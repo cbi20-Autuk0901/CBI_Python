@@ -4,7 +4,7 @@ import sys
 
 import os
 
-from cbi_modules import user_login, user_register, pre_certification, issuer_certification_dashboard, post_certification, all_certifications, id_generator,bond_redemption, forgot_password
+from cbi_modules.issuer import user_login, user_register, pre_certification, issuer_certification_dashboard, post_certification, all_certifications, id_generator,bond_redemption, forgot_password, signed_agreement
 
 from flask_cors import CORS
 
@@ -31,6 +31,7 @@ psql = {
     "host": "143.110.213.22",
     "port": "5432"
 }
+
 @app.route("/api/register", methods=['POST'])
 def register():
 
@@ -234,13 +235,10 @@ def assuranceReport():
         if val == 0:
             cbi_files_response, resp = {"error": "certification doesnt exists"}, 401
         else:
-            if val == 0:
-                cbi_files_response, resp = {"error": "certification doesnt exists"}, 401
-            else:
-                if request.headers.get('certificationType') == 'pre':
-                    cbi_files_response, resp = pre_certification.step_four_get(user_email_address, certification_id, psql)
-                elif request.headers.get('certificationType') == 'post':
-                    cbi_files_response, resp = post_certification.step_four_get(user_email_address, certification_id, psql)
+            if request.headers.get('certificationType') == 'pre':
+                cbi_files_response, resp = pre_certification.step_four_get(user_email_address, certification_id, psql)
+            elif request.headers.get('certificationType') == 'post':
+                cbi_files_response, resp = post_certification.step_four_get(user_email_address, certification_id, psql)
 
         return cbi_files_response, resp
 
@@ -362,6 +360,66 @@ def forgotPassword():
 
     return cbi_forgot_password_response, resp
     
+
+@app.route("/api/signedCertificationAgreement", methods=['POST', 'GET'])
+def signedCertificationAgreement():
+    if request.method == 'POST':
+        certification_id = request.form.get('certificationId')
+        user_email_address = request.form.get('userEmail')
+        user_role = request.form.get('userRole')
+        val = pre_certification.validate_certification(certification_id, "pre", psql)
+        if val == 0:
+            cbi_signed_agreement, resp = {"error": "certification doesnt exists"}, 401
+            return cbi_signed_agreement, resp
+        else:
+            if user_role == 'programmaticIssuer':
+                try:
+                    if 'signedCertificationAgreement' in request.files:
+                        f = request.files['signedCertificationAgreement']
+                        fname = str(certification_id) + '_programmatic_signedCertificationAgreement.pdf'
+                        file_1 = os.path.join(app.config['UPLOAD_FOLDER'], fname)
+                        f.save(file_1)
+                    else:
+                        file_1 = ""
+
+                    cbi_signed_agreement, resp = signed_agreement.programmatic_signed_doc(certification_id, user_email_address, file_1, psql)
+
+                    return cbi_signed_agreement, resp
+                except Exception as e:
+                    error = str(e)
+                    msg = error
+                    return {'error': msg}, 404
+            elif user_role == 'singleIssuer':
+                try:
+                    if 'signedCertificationAgreement' in request.files:
+                        f = request.files['signedCertificationAgreement']
+                        fname = str(certification_id) + '_single_signedCertificationAgreement.pdf'
+                        file_1 = os.path.join(app.config['UPLOAD_FOLDER'], fname)
+                        f.save(file_1)
+                    else:
+                        file_1 = ""
+
+                    cbi_signed_agreement, resp = signed_agreement.single_signed_doc(certification_id, user_email_address, file_1, psql)
+
+                    return cbi_signed_agreement, resp
+                except Exception as e:
+                    error = str(e)
+                    msg = error
+                    return {'error': msg}, 404
+    else:
+        user_email_address = request.headers.get('userEmail')
+        certification_id = request.headers.get('certificationId')
+        val = pre_certification.validate_certification(certification_id, "pre", psql)
+        if val == 0:
+            cbi_signed_agreement, resp = {"error": "certification doesnt exists"}, 401
+        else:
+            if request.headers.get('userRole') == 'programmaticIssuer':
+                cbi_signed_agreement, resp = signed_agreement.programmatic_signed_doc_get(certification_id,user_email_address, psql)
+            elif request.headers.get('userRole') == 'singleIssuer':
+                cbi_signed_agreement, resp = signed_agreement.single_signed_doc_get(certification_id, user_email_address,psql)
+
+        return cbi_signed_agreement, resp
+
 if __name__ == '__main__':
     # app.debug = True
     app.config['DEBUG'] = True

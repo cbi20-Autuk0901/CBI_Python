@@ -6,6 +6,10 @@ import os
 
 from cbi_modules.issuer import user_login, user_register, pre_certification, issuer_certification_dashboard, post_certification, all_certifications, id_generator,bond_redemption, forgot_password, signed_agreement
 
+from cbi_modules.reviewer import reviewer_dashboard, submitted_certification_queue, workboard, approve_certificate, approved_queue
+
+from cbi_modules.admin import all_reports, reviewer_list
+
 from flask_cors import CORS
 
 from werkzeug.utils import secure_filename
@@ -17,6 +21,7 @@ UPLOAD_FOLDER = os.path.dirname(os.path.abspath(__file__)) + '/cbi_uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 cors = CORS(app)
+
 
 UPLOAD_FOLDER = os.path.dirname(os.path.abspath(__file__)) + '/cbi_uploads'
 
@@ -419,6 +424,153 @@ def signedCertificationAgreement():
                 cbi_signed_agreement, resp = signed_agreement.single_signed_doc_get(certification_id, user_email_address,psql)
 
         return cbi_signed_agreement, resp
+
+
+@app.route("/api/reviewerDashboard", methods=['POST'])
+def reviewerDashboard():
+    data = request.json
+    user_email_address = data['userEmail']
+    filter_date = data['filterBy']
+    if filter_date =='':
+        date_value = ''
+    else:
+        date_value = f"and application_date >= '{filter_date}' "
+    
+    reviewer_dashboard_response, resp = reviewer_dashboard.dashboard(user_email_address, filter_date, date_value, psql)
+
+
+    return reviewer_dashboard_response, resp
+
+
+@app.route("/api/assignCertification", methods=['POST', 'GET'])
+def assignCertification():
+    if request.method == 'POST':
+        data = request.json
+        cid = data['certificationId']
+        user_email_address = data['userEmail']
+        cert_type = data['certificationType']
+        val = submitted_certification_queue.validate_reviewer(user_email_address, psql)
+        if val != 0:
+            update_val = submitted_certification_queue.assign_reviewer(user_email_address, cert_type, cid, psql)
+            if update_val != 0:
+                cbi_assignment_queue, resp = submitted_certification_queue.unassigned_queue(user_email_address, psql)
+                return cbi_assignment_queue, resp
+            else:
+                return {'error': 'cant assign User'}, 403
+        else:
+            return {'error': 'Invalid User'}, 401
+
+    else:
+        user_email_address = request.headers.get('userEmail')
+        val = submitted_certification_queue.validate_reviewer(user_email_address, psql)
+        if val != 0:
+            cbi_assignment_queue, resp = submitted_certification_queue.unassigned_queue(user_email_address, psql)
+            return cbi_assignment_queue, resp
+        else:
+            return {'error': 'Invalid User'}, 401
+
+
+@app.route("/api/workBoard", methods=['POST', 'GET'])
+def workBoard():
+    if request.method == 'POST':
+        data = request.json
+        user_email_address = data['userEmail']
+        notes = data['workSpace']
+        val = submitted_certification_queue.validate_reviewer(
+            user_email_address, psql)
+        if val != 0:
+            update_val = workboard.reviewer_workspace(user_email_address, notes, psql)
+            if update_val != 0:
+                cbi_assignment_queue, resp = workboard.assigned_queue(user_email_address, psql)
+                return cbi_assignment_queue, resp
+            else:
+                return {'error': 'cant save Notes to workspace'}, 403
+        else:
+            return {'error': 'Invalid User'}, 401
+
+    else:
+        user_email_address = request.headers.get('userEmail')
+        val = submitted_certification_queue.validate_reviewer(
+            user_email_address, psql)
+        if val != 0:
+            cbi_assignment_queue, resp = workboard.assigned_queue(user_email_address, psql)
+            return cbi_assignment_queue, resp
+        else:
+            return {'error': 'Invalid User'}, 401
+
+
+@app.route("/api/approveCertification", methods=['POST'])
+def approveCertification():
+    if request.method == 'POST':
+        data = request.json
+        user_email_address = data['userEmail']
+        cert_type = data['certificationType']
+        cert_id = data['certificationId']
+        val = submitted_certification_queue.validate_reviewer(user_email_address, psql)
+        if val != 0:
+            cbi_assignment_queue, resp = approve_certificate.cert(cert_type,cert_id,psql)
+            return cbi_assignment_queue, resp
+        else:
+            return {'error': 'Invalid User'}, 401
+
+
+@app.route("/api/getApprovedCertifications", methods=['GET'])
+def getApprovedCertifications():
+    user_email_address = request.headers.get('userEmail')
+    val = submitted_certification_queue.validate_reviewer(
+        user_email_address, psql)
+    if val != 0:
+        cbi_assignment_queue, resp = approved_queue.assigned_queue(
+            user_email_address, psql)
+        return cbi_assignment_queue, resp
+    else:
+        return {'error': 'Invalid User'}, 401
+
+
+@app.route("/api/getAdminReports", methods=['GET'])
+def getAdminReports():
+    user_email_address = request.headers.get('userEmail')
+    val = all_reports.validate_admin(user_email_address, psql)
+    if val != 0:
+        cbi_all_cert_response, resp = all_reports.get_certifications(psql)
+        return cbi_all_cert_response, resp
+    else:
+        return {'error': 'Invalid User'}, 401
+    
+
+@app.route("/api/adminCertificationQueue", methods=['POST', 'GET'])
+def adminCertificationQueue():
+    if request.method == 'POST':
+        data = request.json
+        cid = data['certificationId']
+        user_email_address = data['userEmail']
+        reviewer_email_address = data['reviewerEmail']
+        cert_type = data['certificationType']
+        val = all_reports.validate_admin(user_email_address, psql)
+        if val != 0:
+            update_val = submitted_certification_queue.assign_reviewer(reviewer_email_address, cert_type, cid, psql)
+            if update_val != 0:
+                cbi_assignment_queue, resp = submitted_certification_queue.unassigned_queue(user_email_address, psql)
+                reviewer_emails = reviewer_list.rev_email(psql)
+                cbi_assignment_queue = {"data": cbi_assignment_queue['data'], "reviewerEmail": reviewer_emails['reviewerEmail']}
+                return cbi_assignment_queue, resp
+            else:
+                return {'error': 'cant assign User'}, 403
+        else:
+            return {'error': 'Invalid User'}, 401
+
+    else:
+        user_email_address = request.headers.get('userEmail')
+        val = all_reports.validate_admin(user_email_address, psql)
+        if val != 0:
+            cbi_assignment_queue, resp = submitted_certification_queue.unassigned_queue(user_email_address, psql)
+            reviewer_emails = reviewer_list.rev_email(psql)
+            cbi_assignment_queue = {"data": cbi_assignment_queue['data'], "reviewerEmail": reviewer_emails['reviewerEmail']}
+
+            return cbi_assignment_queue, resp
+        else:
+            return {'error': 'Invalid User'}, 401
+
 
 if __name__ == '__main__':
     # app.debug = True

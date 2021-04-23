@@ -486,6 +486,17 @@ def submit(data, psql):
         cur.execute(query)
         con.commit()
 
+        cur.execute(f"SELECT instrument_type, da_underwriter,cp_company from cbi_post_issuance_certification  WHERE user_email_address='{user_email_address}' and certification_id='{certification_id}'")
+        cert_data = cur.fetchone()
+
+        cur.execute(f"SELECT user_company from CBI_User  WHERE user_email_address='{user_email_address}'")
+        user_data = cur.fetchone()
+
+        query = "INSERT INTO CBI_Certification_Queue(certification_id,certification_type,certification_status,application_date,user_company,certification_company,instrument_type,underwriter) VALUES('{0}', '{1}','{2}','{3}','{4}','{5}','{6}','{7}'); ".format(
+            certification_id, 'post', 'submitted', now,user_data[0],cert_data[2],cert_data[0],cert_data[1])
+        cur.execute(query)
+        con.commit()
+
         con.close()
 
         return {'certificationId': certification_id, 'userEmail': user_email_address, "certificationType": "post"}, 200

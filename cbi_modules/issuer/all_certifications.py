@@ -279,21 +279,21 @@ def get_certifications(user_email_address, psql):
                         "caAssuranceReport": single_issuer_agreement.split("/")[-1],
                         "gbAssuranceReport": verifier_agreement.split("/")[-1]}
                 all_certifications.append(resp_data)
-                if len(data1) != 0:
-                    for i in data1:
-                        resp_data = {"certificationId": i[1],
-                                     "userEmail": i[2],
-                                     "certificationStatus": i[3],
-                                     "instrumentType": i[11],
-                                     "certificationType": "Bond Redemption",
-                                     "uniqueName": i[10],
-                                     "file1": i[4].split("/")[-1],
-                                     "file2": i[5].split("/")[-1],
-                                     "file3": i[6].split("/")[-1],
-                                     "file4": i[7].split("/")[-1],
-                                     "file5": i[8].split("/")[-1],
-                                     "applicationDate":i[9]}
-                        all_certifications.append(resp_data)
+        if len(data1) != 0:
+            for i in data1:
+                resp_data = {"certificationId": i[1],
+                                "userEmail": i[2],
+                                "certificationStatus": i[3],
+                                "instrumentType": i[11],
+                                "certificationType": "Bond Redemption",
+                                "uniqueName": i[10],
+                                "file1": i[4].split("/")[-1],
+                                "file2": i[5].split("/")[-1],
+                                "file3": i[6].split("/")[-1],
+                                "file4": i[7].split("/")[-1],
+                                "file5": i[8].split("/")[-1],
+                                "applicationDate":i[9]}
+                all_certifications.append(resp_data)
                         
             return {'recentCertifications': all_certifications}, 200
         else:

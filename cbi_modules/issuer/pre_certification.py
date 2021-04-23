@@ -2,6 +2,9 @@ import psycopg2
 
 from datetime import datetime
 
+from docxtpl import DocxTemplate
+
+import os
 
 def step_one(data, psql):
         
@@ -412,8 +415,35 @@ def step_three(data, psql):
             pass
 
         con.close()
+        temp = str(ca_application_date).split("T")[0]
+        temp = str(temp).split("-")
+        temp = temp[2]+"-"+temp[1]+"-"+temp[0]
 
-        return {'certificationId': certification_id, 'userEmail': user_email_address, "certificationType": "pre"}, 200
+        context = {
+            'ca_application_date': str(temp) ,
+            'ca_legal_name_issuing_entity': ca_legal_name_issuing_entity.title(),
+            'ca_unique_name_debt_instruments': ca_unique_name_debt_instruments.title(),
+            'ca_address': ca_address.title(),
+            'ca_email_address': ca_email_address.title(),
+            'ca_contact_person': ca_contact_person.title()
+        }
+
+        paths = os.path.dirname(os.path.abspath(__file__)).replace("\\", "/")
+        doc_temp_paths = paths + "/template/agreement.docx"
+        doc = DocxTemplate(doc_temp_paths)
+
+        doc.render(context)
+        doc_filename = "agreement"+"_"+str(certification_id)+".docx"
+        doc_gen_paths = paths+'/template/'+doc_filename
+        doc.save(doc_gen_paths)
+
+        pdf_doc = "agreement"+"_"+str(certification_id)+".pdf"
+
+        os.system(
+            f"/usr/bin/soffice --headless --convert-to pdf {doc_gen_paths} --outdir /var/www/html/cbi-api/cbi_uploads")
+        os.system(f"/bin/rm {doc_gen_paths}")
+
+        return {'certificationId': certification_id, 'userEmail': user_email_address, "certificationType": "pre", "agreement":pdf_doc}, 200
 
     except Exception as e:
         error = str(e)
@@ -476,11 +506,19 @@ def submit(data, psql):
         con.commit()
 
         now = datetime.now()
-        query = "UPDATE cbi_pre_issuance_certification SET ca_application_date='{2}' WHERE user_email_address='{0}' AND certification_id='{1}'; ".format(
-            user_email_address, certification_id,now)
-
+        query = "UPDATE cbi_pre_issuance_certification SET ca_application_date='{2}' WHERE user_email_address='{0}' AND certification_id='{1}'; ".format(user_email_address, certification_id,now)
         cur.execute(query)
+        con.commit()
 
+        cur.execute(f"SELECT instrument_type, da_underwriter,cp_company from cbi_pre_issuance_certification  WHERE user_email_address='{user_email_address}' and certification_id='{certification_id}'")
+        cert_data = cur.fetchone()
+
+        cur.execute(f"SELECT user_company from CBI_User  WHERE user_email_address='{user_email_address}'")
+        user_data = cur.fetchone()
+
+        query = "INSERT INTO CBI_Certification_Queue(certification_id,certification_type,certification_status,application_date,user_company,certification_company,instrument_type,underwriter) VALUES('{0}', '{1}','{2}','{3}','{4}','{5}','{6}','{7}'); ".format(
+            certification_id, 'pre', 'submitted', now,user_data[0],cert_data[2],cert_data[0],cert_data[1])
+        cur.execute(query)
         con.commit()
 
         con.close()

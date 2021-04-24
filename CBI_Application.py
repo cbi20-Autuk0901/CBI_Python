@@ -8,7 +8,7 @@ from cbi_modules.issuer import user_login, user_register, pre_certification, iss
 
 from cbi_modules.reviewer import reviewer_dashboard, submitted_certification_queue, workboard, approve_certificate, approved_queue
 
-from cbi_modules.admin import all_reports, reviewer_list
+from cbi_modules.admin import all_reports, reviewer_list, admin_dashboard
 
 from flask_cors import CORS
 
@@ -36,7 +36,6 @@ psql = {
     "host": "143.110.213.22",
     "port": "5432"
 }
-
 @app.route("/api/register", methods=['POST'])
 def register():
 
@@ -571,6 +570,18 @@ def adminCertificationQueue():
         else:
             return {'error': 'Invalid User'}, 401
 
+
+@app.route("/api/adminDashboard", methods=['POST'])
+def adminDashboard():
+    data = request.json
+    user_email_address = data['userEmail']
+    val = all_reports.validate_admin(user_email_address, psql)
+    if val != 0:
+        cbi_admin_dashboard, resp = admin_dashboard.dashboard(psql)
+
+        return cbi_admin_dashboard, resp
+    else:
+        return {'error': 'Invalid User'}, 401
 
 if __name__ == '__main__':
     # app.debug = True

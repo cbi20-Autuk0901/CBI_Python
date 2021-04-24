@@ -224,6 +224,12 @@ def get_certifications(user_email_address, psql):
                 if verifier_agreement is None:
                     verifier_agreement = ""
 
+                certification_status = i[3]
+                if certification_status != "approved":
+                    certificate = ""
+                else:
+                    certificate = f"certificate_"+str(i[1])+"_"+str(i[53])+".pdf"
+
 
                 resp_data = {"certificationId": i[1],
                         "userEmail": i[2],
@@ -277,10 +283,16 @@ def get_certifications(user_email_address, psql):
                         "issuerContactPerson": ca_contact_person,
                         "signature": ca_signature,
                         "caAssuranceReport": single_issuer_agreement.split("/")[-1],
-                        "gbAssuranceReport": verifier_agreement.split("/")[-1]}
+                        "gbAssuranceReport": verifier_agreement.split("/")[-1],
+                        "certificate": certificate}
                 all_certifications.append(resp_data)
         if len(data1) != 0:
             for i in data1:
+                certification_status = i[3]
+                if certification_status != "approved":
+                    certificate = ""
+                else:
+                    certificate = f"certificate_"+str(i[1])+"_bond_redemption.pdf"
                 resp_data = {"certificationId": i[1],
                                 "userEmail": i[2],
                                 "certificationStatus": i[3],
@@ -292,7 +304,8 @@ def get_certifications(user_email_address, psql):
                                 "file3": i[6].split("/")[-1],
                                 "file4": i[7].split("/")[-1],
                                 "file5": i[8].split("/")[-1],
-                                "applicationDate":i[9]}
+                                "applicationDate": i[9],
+                                "certificate": certificate}
                 all_certifications.append(resp_data)
                         
             return {'recentCertifications': all_certifications}, 200

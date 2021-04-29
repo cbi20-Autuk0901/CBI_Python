@@ -11,7 +11,7 @@ def redeem(certification_id, user_email_address, file_1, file_2,file3, file4, fi
         cur = con.cursor()
 
         cur.execute(
-            f"SELECT * from cbi_bond_redemption WHERE certification_id='{certification_id}'")
+            f"SELECT id, certification_id, user_email_address, certification_status, file1, file2, file3, file4, file5, application_date from cbi_bond_redemption WHERE certification_id='{certification_id}'")
         data = cur.fetchone()
 
         con.close()

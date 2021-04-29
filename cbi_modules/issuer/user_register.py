@@ -23,7 +23,7 @@ def register(data,psql):
 
         user_password = data['password']
         if user_password is "":
-            user_password = None
+            user_password = "cbi"
 
         user_category = data['userRole']
         if user_category is "":
@@ -53,13 +53,17 @@ def register(data,psql):
         if invoice_phone_number is "":
             invoice_phone_number = None
 
+        user_job_title = data['jobTitle']
+        if user_job_title is "":
+            user_job_title = None
+
 
         con = psycopg2.connect(database=psql['database'], user=psql['user'],password=psql['password'], host=psql['host'], port=psql['port'])
 
         cur = con.cursor()
 
-        query = "INSERT INTO cbi_user(user_first_name, user_last_name, user_company, user_email_address, user_password, user_category, user_location, invoice_company_name, invoice_registration_number, invoice_billing_address, invoice_email_address, invoice_phone_number) VALUES('{0}', '{1}', '{2}', '{3}', '{4}', '{5}', '{6}', '{7}', '{8}', '{9}', '{10}', '{11}'); ".format(
-            user_first_name, user_last_name, user_company, user_email_address, generate_password_hash(user_password.strip(), method='sha256'), user_category, user_location, invoice_company_name, invoice_registration_number, invoice_billing_address, invoice_email_address, invoice_phone_number)
+        query = "INSERT INTO cbi_user(user_first_name, user_last_name, user_company, user_email_address, user_password, user_category, user_location, invoice_company_name, invoice_registration_number, invoice_billing_address, invoice_email_address, invoice_phone_number,user_job_title) VALUES('{0}', '{1}', '{2}', '{3}', '{4}', '{5}', '{6}', '{7}', '{8}', '{9}', '{10}', '{11}', '{12}'); ".format(
+            user_first_name, user_last_name, user_company, user_email_address, generate_password_hash(user_password.strip(), method='sha256'), user_category, user_location, invoice_company_name, invoice_registration_number, invoice_billing_address, invoice_email_address, invoice_phone_number, user_job_title)
 
         cur.execute(query)
 

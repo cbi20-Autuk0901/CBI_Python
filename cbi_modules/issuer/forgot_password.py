@@ -19,7 +19,7 @@ def reset(user_email_address,psql):
         cur = con.cursor()
 
         cur.execute(
-            f"SELECT * from cbi_user WHERE user_email_address!='{user_email_address}'")
+            f"SELECT user_id, user_first_name, user_last_name, user_company, user_email_address, user_password, user_category, user_location, invoice_company_name, invoice_registration_number, invoice_billing_address, invoice_email_address, invoice_phone_number, user_job_title from cbi_user WHERE user_email_address!='{user_email_address}'")
         data = cur.fetchone()
 
         con.commit()
@@ -50,7 +50,7 @@ def reset(user_email_address,psql):
 def mail(to, res):
     sender = 'cbigithub@vigameq.com'
     recipient = to
-    body =f"Please use the Below tempory password to login inot the CBI Portal, We strictly advise you to change the password once Logged in. \n Passowrd: {res}"
+    body =f"Please use the Below tempory password to login into the CBI Portal, We strictly advise you to change the password once Logged in. \n Passowrd: {res}"
     msg = MIMEText(body)
     msg['Subject'] = "Climate Bond Password Reset"
     msg['From'] = sender

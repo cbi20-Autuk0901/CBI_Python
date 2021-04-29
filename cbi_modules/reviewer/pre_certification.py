@@ -369,11 +369,8 @@ def step_three(data, psql):
         if len(ca_application_date) > 0:
             cur.execute(f"UPDATE cbi_pre_issuance_certification SET ca_application_date='{ca_application_date}' WHERE user_email_address='{user_email_address}' AND certification_id='{certification_id}'; ")
             con.commit()
-            temp = str(ca_application_date).split("T")[0]
-            temp = str(temp).split("-")
-            temp = temp[2]+"-"+temp[1]+"-"+temp[0]
         else:
-            temp=''
+            pass
 
         ca_legal_name_issuing_entity = data['issuingEntityLegalName']
         if len(ca_legal_name_issuing_entity) > 0:
@@ -417,45 +414,19 @@ def step_three(data, psql):
         else:
             pass
 
-        cur.execute(f"select user_category from cbi_user WHERE user_email_address='{user_email_address}';")
-        user_role = str(cur.fetchone()[0])
-
-        cur.execute(f"select invoice_registration_number from cbi_user WHERE user_email_address='{user_email_address}';")
-        invoice_registration_number = str(cur.fetchone()[0])
-        con.commit()
-
-        cur.execute(f"select user_location from cbi_user WHERE user_email_address='{user_email_address}';")
-        user_location = str(cur.fetchone()[0])
-        con.commit()
-
         con.close()
 
+        context = {
+            'ca_application_date': str(ca_application_date).split("T")[0],
+            'ca_legal_name_issuing_entity': ca_legal_name_issuing_entity.title(),
+            'ca_unique_name_debt_instruments': ca_unique_name_debt_instruments.title(),
+            'ca_address': ca_address.title(),
+            'ca_email_address': ca_email_address.title(),
+            'ca_contact_person': ca_contact_person.title()
+        }
 
         paths = os.path.dirname(os.path.abspath(__file__)).replace("\\", "/")
-        
-        if user_role == 'verifier':
-            context = {
-                'ca_application_date': str(temp) ,
-                'ca_legal_name_issuing_entity': ca_legal_name_issuing_entity.title(),
-                'ca_unique_name_debt_instruments': ca_unique_name_debt_instruments.title(),
-                'ca_address': ca_address.title(),
-                'ca_email_address': ca_email_address.title(),
-                'ca_contact_person': ca_contact_person.title(),
-                'invoice_registration_number': invoice_registration_number,
-                'user_location': user_location.title()
-            }
-            doc_temp_paths = paths + "/template/verifier_agreement.docx"
-        else:
-            context = {
-                'ca_application_date': str(temp),
-                'ca_legal_name_issuing_entity': ca_legal_name_issuing_entity.title(),
-                'ca_unique_name_debt_instruments': ca_unique_name_debt_instruments.title(),
-                'ca_address': ca_address.title(),
-                'ca_email_address': ca_email_address.title(),
-                'ca_contact_person': ca_contact_person.title()
-            }
-            doc_temp_paths = paths + "/template/agreement.docx"
-        
+        doc_temp_paths = paths + "/template/agreement.docx"
         doc = DocxTemplate(doc_temp_paths)
 
         doc.render(context)

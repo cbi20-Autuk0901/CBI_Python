@@ -13,7 +13,7 @@ def assigned_queue(user_email_address, psql):
         cur = con.cursor()
 
         cur.execute(
-            f"select * from cbi_certification_queue where reviewer='{user_email_address}' and certification_status='approved' ;")
+            f"select id, certification_id, certification_type, certification_status, reviewer, application_date, assigned_date, approved_date, user_company, certification_company, instrument_type, underwriter from cbi_certification_queue where reviewer='{user_email_address}' and certification_status='approved' ;")
         cert_queue = cur.fetchall()
         con.commit()
 
@@ -22,7 +22,7 @@ def assigned_queue(user_email_address, psql):
             for i in cert_queue:
                 if i[2] == 'pre':
                     cur.execute(
-                        f"select * from cbi_pre_issuance_certification where certification_id='{i[1]}' ;")
+                        f"select id, certification_id, user_email_address, certification_status, instrument_type, da_name, da_issuance_country, da_cusip, da_isin, da_local_currency_lc, da_amount_issued_lc, da_coupon, da_underwriter, da_issue_date, da_maturity_date, da_instrument_type, d_renewable_energy, d_renewable_energy_text, ps_financing_asset, ps_proceeds_allocation, pe_portfolio_approach, pe_assessment_procedure, pm_proceed_type, pm_proceed_detail, pm_proceed_timing, pm_proceed_use, ar_report_interval, ar_report_format, ar_report_access, ar_report_link, ar_report_breakdown, ir_report_interval, ir_report_format, ir_report_access, ir_report_link, ir_report_indicators, ci_address_head_office, ci_vat_number, ci_business_reg_number, cp_name, cp_position, cp_company, cp_contact_number, id_name, ca_application_date, ca_legal_name_issuing_entity, ca_unique_name_debt_instruments, ca_address, ca_email_address, ca_contact_person, ca_signature, single_issuer_agreement, verifier_agreement from cbi_pre_issuance_certification where certification_id='{i[1]}' ;")
                     cert_queue_data = cur.fetchone()
                     con.commit()
 
@@ -314,7 +314,7 @@ def assigned_queue(user_email_address, psql):
                     queue_main_data.append(resp_data)
                 elif i[2] == 'post':
                     cur.execute(
-                        f"select * from cbi_post_issuance_certification where certification_id='{i[1]}' ;")
+                        f"select id, certification_id, user_email_address, certification_status, instrument_type, da_name, da_issuance_country, da_cusip, da_isin, da_local_currency_lc, da_amount_issued_lc, da_coupon, da_underwriter, da_issue_date, da_maturity_date, da_instrument_type, ps_financing_asset, ps_proceeds_allocation, pe_portfolio_approach, pe_assessment_procedure, pm_proceed_type, pm_proceed_detail, pm_proceed_timing, pm_proceed_use, ar_report_interval, ar_report_format, ar_report_access, ar_report_link, ar_report_breakdown, ir_report_interval, ir_report_format, ir_report_access, ir_report_link, ir_report_indicators, d_renewable_energy, d_renewable_energy_text, ci_address_head_office, ci_vat_number, ci_business_reg_number, cp_name, cp_position, cp_company, cp_contact_number, id_name, ca_application_date, ca_legal_name_issuing_entity, ca_unique_name_debt_instruments, ca_address, ca_email_address, ca_contact_person, ca_signature, single_issuer_agreement, verifier_agreement from cbi_post_issuance_certification where certification_id='{i[1]}' ;")
                     cert_queue_data = cur.fetchone()
                     con.commit()
 
@@ -606,7 +606,7 @@ def assigned_queue(user_email_address, psql):
                     queue_main_data.append(resp_data)
                 elif i[2] == 'bond_redemption':
                     cur.execute(
-                        f"select * from cbi_post_issuance_certification where certification_id='{i[1]}' ;")
+                        f"select id, certification_id, user_email_address, certification_status, instrument_type, da_name, da_issuance_country, da_cusip, da_isin, da_local_currency_lc, da_amount_issued_lc, da_coupon, da_underwriter, da_issue_date, da_maturity_date, da_instrument_type, ps_financing_asset, ps_proceeds_allocation, pe_portfolio_approach, pe_assessment_procedure, pm_proceed_type, pm_proceed_detail, pm_proceed_timing, pm_proceed_use, ar_report_interval, ar_report_format, ar_report_access, ar_report_link, ar_report_breakdown, ir_report_interval, ir_report_format, ir_report_access, ir_report_link, ir_report_indicators, d_renewable_energy, d_renewable_energy_text, ci_address_head_office, ci_vat_number, ci_business_reg_number, cp_name, cp_position, cp_company, cp_contact_number, id_name, ca_application_date, ca_legal_name_issuing_entity, ca_unique_name_debt_instruments, ca_address, ca_email_address, ca_contact_person, ca_signature, single_issuer_agreement, verifier_agreement from cbi_post_issuance_certification where certification_id='{i[1]}' ;")
                     cert_queue_data = cur.fetchone()
                     con.commit()
 
@@ -634,7 +634,7 @@ def assigned_queue(user_email_address, psql):
                     verifier_company = verifier[0]
 
                     cur.execute(
-                        f"select * from cbi_bond_redemption where certification_id='{i[1]}' ;")
+                        f"select id, certification_id, user_email_address, certification_status, file1, file2, file3, file4, file5, application_date from cbi_bond_redemption where certification_id='{i[1]}' ;")
                     cert_queue_data_redemption = cur.fetchone()
                     con.commit()
 

@@ -10,11 +10,11 @@ def get_certifications(psql):
         cur = con.cursor()
 
         cur.execute(
-            f"(select *,'post' as certification_type from cbi_post_issuance_certification ) UNION (select *,'pre' as certification_type from cbi_pre_issuance_certification );")
+            f"(select id, certification_id, user_email_address, certification_status, instrument_type, da_name, da_issuance_country, da_cusip, da_isin, da_local_currency_lc, da_amount_issued_lc, da_coupon, da_underwriter, da_issue_date, da_maturity_date, da_instrument_type, ps_financing_asset, ps_proceeds_allocation, pe_portfolio_approach, pe_assessment_procedure, pm_proceed_type, pm_proceed_detail, pm_proceed_timing, pm_proceed_use, ar_report_interval, ar_report_format, ar_report_access, ar_report_link, ar_report_breakdown, ir_report_interval, ir_report_format, ir_report_access, ir_report_link, ir_report_indicators, d_renewable_energy, d_renewable_energy_text, ci_address_head_office, ci_vat_number, ci_business_reg_number, cp_name, cp_position, cp_company, cp_contact_number, id_name, ca_application_date, ca_legal_name_issuing_entity, ca_unique_name_debt_instruments, ca_address, ca_email_address, ca_contact_person, ca_signature, single_issuer_agreement, verifier_agreement,'post' as certification_type from cbi_post_issuance_certification ) UNION (select id, certification_id, user_email_address, certification_status, instrument_type, da_name, da_issuance_country, da_cusip, da_isin, da_local_currency_lc, da_amount_issued_lc, da_coupon, da_underwriter, da_issue_date, da_maturity_date, da_instrument_type, d_renewable_energy, d_renewable_energy_text, ps_financing_asset, ps_proceeds_allocation, pe_portfolio_approach, pe_assessment_procedure, pm_proceed_type, pm_proceed_detail, pm_proceed_timing, pm_proceed_use, ar_report_interval, ar_report_format, ar_report_access, ar_report_link, ar_report_breakdown, ir_report_interval, ir_report_format, ir_report_access, ir_report_link, ir_report_indicators, ci_address_head_office, ci_vat_number, ci_business_reg_number, cp_name, cp_position, cp_company, cp_contact_number, id_name, ca_application_date, ca_legal_name_issuing_entity, ca_unique_name_debt_instruments, ca_address, ca_email_address, ca_contact_person, ca_signature, single_issuer_agreement, verifier_agreement,'pre' as certification_type from cbi_pre_issuance_certification );")
         data = cur.fetchall()
 
         cur.execute(
-            f"(select a.*,b.da_name,b.instrument_type from cbi_bond_redemption a left join cbi_pre_issuance_certification b on a.certification_id=b.certification_id );")
+            f"(select a.id, a.certification_id, a.user_email_address, a.certification_status, a.file1, a.file2, a.file3, a.file4, a.file5, a.application_date,b.da_name,b.instrument_type from cbi_bond_redemption a left join cbi_pre_issuance_certification b on a.certification_id=b.certification_id );")
         data1 = cur.fetchall()
 
         con.commit()
@@ -331,7 +331,7 @@ def validate_admin(user_email_address, psql):
         cur = con.cursor()
 
         cur.execute(
-            f"SELECT * from CBI_User  WHERE user_email_address='{user_email_address}' and user_category='admin'")
+            f"SELECT user_id, user_first_name, user_last_name, user_company, user_email_address, user_password, user_category, user_location, invoice_company_name, invoice_registration_number, invoice_billing_address, invoice_email_address, invoice_phone_number, user_job_title from CBI_User  WHERE user_email_address='{user_email_address}' and user_category='admin'")
         admin = cur.fetchone()
         con.commit()
         con.close()

@@ -8,7 +8,7 @@ from cbi_modules.issuer import user_login, user_register, pre_certification, iss
 
 from cbi_modules.reviewer import reviewer_dashboard, submitted_certification_queue, workboard, approve_certificate, approved_queue
 
-from cbi_modules.admin import all_reports, reviewer_list, admin_dashboard
+from cbi_modules.admin import all_reports, reviewer_list, admin_dashboard, teams_and_roles, admin_user_management
 
 from flask_cors import CORS
 
@@ -36,14 +36,20 @@ psql = {
     "host": "143.110.213.22",
     "port": "5432"
 }
-@app.route("/api/register", methods=['POST'])
+
+@app.route("/api/register", methods=['POST','GET'])
 def register():
+    if request.method == 'POST':
 
-    data = request.json
+        data = request.json
 
-    cbi_register_response,resp = user_register.register(data,psql)
+        cbi_register_response,resp = user_register.register(data,psql)
 
-    return cbi_register_response,resp
+        return cbi_register_response,resp
+    else:
+        invite_token = request.headers.get('inviteToken')
+        cbi_verify_token, resp = admin_user_management.verify_token(invite_token,psql)
+        return cbi_verify_token, resp
 
 
 
@@ -410,6 +416,23 @@ def signedCertificationAgreement():
                     error = str(e)
                     msg = error
                     return {'error': msg}, 404
+            elif user_role == 'verifier':
+                try:
+                    if 'signedCertificationAgreement' in request.files:
+                        f = request.files['signedCertificationAgreement']
+                        fname = str(certification_id) + '_verifier_signedCertificationAgreement.pdf'
+                        file_1 = os.path.join(app.config['UPLOAD_FOLDER'], fname)
+                        f.save(file_1)
+                    else:
+                        file_1 = ""
+
+                    cbi_signed_agreement, resp = signed_agreement.verifier_signed_doc(certification_id, user_email_address, file_1, psql)
+
+                    return cbi_signed_agreement, resp
+                except Exception as e:
+                    error = str(e)
+                    msg = error
+                    return {'error': msg}, 404
     else:
         user_email_address = request.headers.get('userEmail')
         certification_id = request.headers.get('certificationId')
@@ -421,6 +444,8 @@ def signedCertificationAgreement():
                 cbi_signed_agreement, resp = signed_agreement.programmatic_signed_doc_get(certification_id,user_email_address, psql)
             elif request.headers.get('userRole') == 'singleIssuer':
                 cbi_signed_agreement, resp = signed_agreement.single_signed_doc_get(certification_id, user_email_address,psql)
+            elif request.headers.get('userRole') == 'verifier':
+                cbi_signed_agreement, resp = signed_agreement.verifier_signed_doc_get(certification_id, user_email_address,psql)
 
         return cbi_signed_agreement, resp
 
@@ -582,6 +607,88 @@ def adminDashboard():
         return cbi_admin_dashboard, resp
     else:
         return {'error': 'Invalid User'}, 401
+
+@app.route("/api/userManagement", methods=['GET'])
+def userManagement():
+    user_email_address = request.headers.get('userEmail')
+    val = all_reports.validate_admin(user_email_address, psql)
+    if val != 0:
+        cbi_teams_and_roles, resp = teams_and_roles.stats(psql)
+        return cbi_teams_and_roles, resp
+    else:
+        return {'error': 'Invalid User'}, 401
+
+
+@app.route("/api/addUser", methods=['POST'])
+def addUser():
+    data = request.json
+    admin_email_address = data['adminEmail']
+    user_email_address = data['userEmail']
+    val = all_reports.validate_admin(admin_email_address, psql)
+    if val != 0:
+        cbi_register_response, resp = user_register.register(data, psql)
+        if resp == 200:
+            cbi_forgot_password_response, resp1 = admin_user_management.reset(user_email_address, psql)
+            if resp1 == 200:
+                cbi_teams_and_roles, resp = teams_and_roles.stats(psql)
+                return cbi_teams_and_roles, resp
+            else:
+                return cbi_forgot_password_response, resp1
+        else:
+            return cbi_register_response, resp
+    else:
+        return {'error': 'Invalid User'}, 401
+
+
+@app.route("/api/updateUser", methods=['POST'])
+def updateUser():
+    data = request.json
+    admin_email_address = data['adminEmail']
+    val = all_reports.validate_admin(admin_email_address, psql)
+    if val != 0:
+        cbi_register_response, resp = admin_user_management.update(data, psql)
+        if resp == 200:
+            cbi_teams_and_roles, resp = teams_and_roles.stats(psql)
+            return cbi_teams_and_roles, resp
+        else:
+            return cbi_register_response, resp
+    else:
+        return {'error': 'Invalid User'}, 401
+
+
+@app.route("/api/removeUser", methods=['POST'])
+def removeUser():
+    data = request.json
+    admin_email_address = data['adminEmail']
+    user_email_address = data['userEmail']
+    val = all_reports.validate_admin(admin_email_address, psql)
+    if val != 0:
+        cbi_register_response, resp = admin_user_management.remove(user_email_address, psql)
+        if resp == 200:
+            cbi_teams_and_roles, resp = teams_and_roles.stats(psql)
+            return cbi_teams_and_roles, resp
+        else:
+            return cbi_register_response, resp
+    else:
+        return {'error': 'Invalid User'}, 401
+
+
+@app.route("/api/inviteIssuer", methods=['POST'])
+def inviteIssuer():
+    data = request.json
+    admin_email_address = data['adminEmail']
+    user_email_address = data['userEmail']
+    val = all_reports.validate_admin(admin_email_address, psql)
+    if val != 0:
+        cbi_register_response, resp = admin_user_management.invite(user_email_address, psql)
+        if resp == 200:
+            cbi_teams_and_roles, resp = teams_and_roles.stats(psql)
+            return cbi_teams_and_roles, resp
+        else:
+            return cbi_register_response, resp
+    else:
+        return {'error': 'Invalid User'}, 401
+
 
 if __name__ == '__main__':
     # app.debug = True

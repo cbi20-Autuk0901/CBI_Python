@@ -4,7 +4,7 @@ import sys
 
 import os
 
-from cbi_modules.issuer import user_login, user_register, pre_certification, issuer_certification_dashboard, post_certification, all_certifications, id_generator,bond_redemption, forgot_password, signed_agreement
+from cbi_modules.issuer import user_login, user_register, pre_certification, issuer_certification_dashboard, post_certification, all_certifications, id_generator,bond_redemption, forgot_password, signed_agreement, annual_report
 
 from cbi_modules.reviewer import reviewer_dashboard, submitted_certification_queue, workboard, approve_certificate, approved_queue
 
@@ -36,7 +36,6 @@ psql = {
     "host": "143.110.213.22",
     "port": "5432"
 }
-
 @app.route("/api/register", methods=['POST','GET'])
 def register():
     if request.method == 'POST':
@@ -613,7 +612,7 @@ def userManagement():
     user_email_address = request.headers.get('userEmail')
     val = all_reports.validate_admin(user_email_address, psql)
     if val != 0:
-        cbi_teams_and_roles, resp = teams_and_roles.stats(psql)
+        cbi_teams_and_roles, resp = teams_and_roles.stats(user_email_address,psql)
         return cbi_teams_and_roles, resp
     else:
         return {'error': 'Invalid User'}, 401
@@ -626,11 +625,11 @@ def addUser():
     user_email_address = data['userEmail']
     val = all_reports.validate_admin(admin_email_address, psql)
     if val != 0:
-        cbi_register_response, resp = user_register.register(data, psql)
+        cbi_register_response, resp = user_register.management(data, psql)
         if resp == 200:
             cbi_forgot_password_response, resp1 = admin_user_management.reset(user_email_address, psql)
             if resp1 == 200:
-                cbi_teams_and_roles, resp = teams_and_roles.stats(psql)
+                cbi_teams_and_roles, resp = teams_and_roles.stats(admin_email_address,psql)
                 return cbi_teams_and_roles, resp
             else:
                 return cbi_forgot_password_response, resp1
@@ -648,7 +647,7 @@ def updateUser():
     if val != 0:
         cbi_register_response, resp = admin_user_management.update(data, psql)
         if resp == 200:
-            cbi_teams_and_roles, resp = teams_and_roles.stats(psql)
+            cbi_teams_and_roles, resp = teams_and_roles.stats(admin_email_address,psql)
             return cbi_teams_and_roles, resp
         else:
             return cbi_register_response, resp
@@ -665,7 +664,7 @@ def removeUser():
     if val != 0:
         cbi_register_response, resp = admin_user_management.remove(user_email_address, psql)
         if resp == 200:
-            cbi_teams_and_roles, resp = teams_and_roles.stats(psql)
+            cbi_teams_and_roles, resp = teams_and_roles.stats(admin_email_address,psql)
             return cbi_teams_and_roles, resp
         else:
             return cbi_register_response, resp
@@ -682,12 +681,33 @@ def inviteIssuer():
     if val != 0:
         cbi_register_response, resp = admin_user_management.invite(user_email_address, psql)
         if resp == 200:
-            cbi_teams_and_roles, resp = teams_and_roles.stats(psql)
+            cbi_teams_and_roles, resp = teams_and_roles.stats(admin_email_address,psql)
             return cbi_teams_and_roles, resp
         else:
             return cbi_register_response, resp
     else:
         return {'error': 'Invalid User'}, 401
+
+@app.route("/api/submitAnnualReport", methods=['POST'])
+def submitAnnualReport():
+    certification_id = request.form.get('certificationId')
+    certification_type = request.form.get('certificationType')
+    try:
+        if 'annualReport' in request.files:
+            f = request.files['annualReport']
+            fname = str(certification_id)+f'_{certification_type}_annual_report.pdf'
+            file_1 = os.path.join(app.config['UPLOAD_FOLDER'], fname)
+            f.save(file_1)
+        else:
+            file_1 =""
+
+        cbi_anual_response, resp = annual_report.upload_report(certification_id, certification_type, file_1, fname, psql)
+
+        return cbi_anual_response, resp
+    except Exception as e:
+        error = str(e)
+        msg = error
+        return {'error': msg}, 404
 
 
 if __name__ == '__main__':

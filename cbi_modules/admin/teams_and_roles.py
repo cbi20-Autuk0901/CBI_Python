@@ -1,7 +1,7 @@
 import psycopg2
 
 
-def stats(psql):
+def stats(user_email_address,psql):
 
     try:
 
@@ -49,7 +49,7 @@ def stats(psql):
         # admins
         try:
             cur.execute(
-                f"select user_id, user_first_name, user_last_name, user_company, user_email_address, user_password, user_category, user_location, invoice_company_name, invoice_registration_number, invoice_billing_address, invoice_email_address, invoice_phone_number, user_job_title from cbi_user where user_category='admin'")
+                f"select user_id, user_first_name, user_last_name, user_company, user_email_address, user_password, user_category, user_location, invoice_company_name, invoice_registration_number, invoice_billing_address, invoice_email_address, invoice_phone_number, user_job_title from cbi_user where user_category='admin' and user_email_address != '{user_email_address}'")
             admin_data = cur.fetchall()
             con.commit()
             admins_details = []

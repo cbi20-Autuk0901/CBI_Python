@@ -420,7 +420,7 @@ def step_three(data, psql):
 
         con.close()
 
-        return {'certificationId': certification_id, 'userEmail': user_email_address, "certificationType": "post"}, 200
+        return {'certificationId': certification_id, 'userEmail': user_email_address, "certificationType": "post", "agreement": "agreement"+"_"+str(certification_id)+".pdf"}, 200
 
     except Exception as e:
         error = str(e)
@@ -832,7 +832,8 @@ def step_three_get(user_email_address, certification_id, psql):
                 "address": ca_address,
                 "email": ca_email_address,
                 "issuerContactPerson": ca_contact_person,
-                "signature": ca_signature}, 200
+                "signature": ca_signature,
+                "agreement": "agreement"+"_"+str(certification_id)+".pdf"}, 200
 
     except Exception as e:
         error = str(e)

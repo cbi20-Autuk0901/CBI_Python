@@ -54,7 +54,7 @@ def mail_annual_report(file_1,fname,reviewer,certification_id, certification_typ
         MIMEText(body), MIMEText(body, 'html')])
     msg['Subject'] = f"Annual Report of {certification_id}"
     msg['From'] = sender
-    msg['To'] = ", ".join(recipient)
+    msg['To'] = recipient
 
     attachment = open(filepath, "rb")
     p = MIMEBase('application', 'octet-stream')

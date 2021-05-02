@@ -12,7 +12,7 @@ def single_signed_doc(certification_id, user_email_address, file_1, psql):
 
         cur = con.cursor()
 
-        cur.execute(f"SELECT id, certification_id, user_email_address, signed_agreement, application_dateid, certification_id, user_email_address, signed_agreement, application_date from cbi_single_signed_agreement WHERE user_email_address='{user_email_address}' and certification_id='{certification_id}'")
+        cur.execute(f"SELECT id, certification_id, user_email_address, signed_agreement, application_date from cbi_single_signed_agreement WHERE user_email_address='{user_email_address}' and certification_id='{certification_id}'")
         data = cur.fetchone()
 
         now = datetime.now()

@@ -106,10 +106,10 @@ def cert(cert_type,cert_id,psql):
         generate_certificate(instrument_type, issuing_entity_legal_name, approval_date,cert_id,cert_type)
         if cert_type == "pre":
             generate_approval_pre(cert_id, cert_type, approval_date, cp_name, issuing_entity_legal_name, cp_address, unique_name)
-            mail_issuer_pre(cert_id, cert_type,issuer_name, da_name)
+            mail_issuer_pre(cert_id, cert_type,issuer_name, da_name,data[5])
         elif cert_type == "post":
             generate_approval_post(cert_id, cert_type, approval_date, cp_name, issuing_entity_legal_name, cp_address, unique_name)
-            mail_issuer_post(cert_id, cert_type,issuer_name, da_name)
+            mail_issuer_post(cert_id, cert_type,issuer_name, da_name,data[5])
         elif cert_type == "bond_redemption":
             # mail_issuer_bond(cert_id, cert_type)
             pass
@@ -122,7 +122,7 @@ def cert(cert_type,cert_id,psql):
         return {'error': error}, 409
 
         
-def mail_issuer_pre(cert_id, cert_type, issuer_name, da_name):
+def mail_issuer_pre(cert_id, cert_type, issuer_name, da_name, user_email):
     paths = os.path.dirname(os.path.abspath(__file__)).replace("\\", "/")
 
     filename1 = "certificate_"+str(cert_id)+"_"+str(cert_type)+".pdf"
@@ -138,7 +138,7 @@ def mail_issuer_pre(cert_id, cert_type, issuer_name, da_name):
     filepath4 = paths+'/template/'+filename4
 
     sender = 'cbigithub@vigameq.com'
-    recipient = ['varunomkar007@gmail.com', 'naveenbodicherla@gmail.com','nithin.gangadhar@vigameq.com','vishwas.vidyaranya@climatebonds.net']
+    recipient = user_email#['varunomkar007@gmail.com', 'naveenbodicherla@gmail.com','nithin.gangadhar@vigameq.com','vishwas.vidyaranya@climatebonds.net']
 
 
     body = f"""
@@ -177,7 +177,7 @@ def mail_issuer_pre(cert_id, cert_type, issuer_name, da_name):
         MIMEText(body), MIMEText(body, 'html')])
     msg['Subject'] = f"Confirmation of Pre-Issuance Certification of {da_name}"
     msg['From'] = sender
-    msg['To'] = ", ".join(recipient)
+    msg['To'] = recipient#", ".join(recipient)
 
     attachment = open(filepath1, "rb")
     p = MIMEBase('application', 'octet-stream')
@@ -217,7 +217,7 @@ def mail_issuer_pre(cert_id, cert_type, issuer_name, da_name):
     server.quit()
 
 
-def mail_issuer_post(cert_id, cert_type, issuer_name, da_name):
+def mail_issuer_post(cert_id, cert_type, issuer_name, da_name, user_email):
     paths = os.path.dirname(os.path.abspath(__file__)).replace("\\", "/")
 
     filename1 = "certificate_"+str(cert_id)+"_"+str(cert_type)+".pdf"
@@ -233,7 +233,7 @@ def mail_issuer_post(cert_id, cert_type, issuer_name, da_name):
     filepath4 = paths+'/template/'+filename4
 
     sender = 'cbigithub@vigameq.com'
-    recipient = ['varunomkar007@gmail.com', 'naveenbodicherla@gmail.com','nithin.gangadhar@vigameq.com','vishwas.vidyaranya@climatebonds.net']
+    recipient = user_email#['varunomkar007@gmail.com', 'naveenbodicherla@gmail.com','nithin.gangadhar@vigameq.com','vishwas.vidyaranya@climatebonds.net']
 
     body = f"""
             <html>
@@ -270,7 +270,7 @@ def mail_issuer_post(cert_id, cert_type, issuer_name, da_name):
         MIMEText(body), MIMEText(body, 'html')])
     msg['Subject'] = f"Confirmation of Post-Issuance Certification of {da_name}"
     msg['From'] = sender
-    msg['To'] = ", ".join(recipient)
+    msg['To'] = recipient#", ".join(recipient)
 
     attachment = open(filepath1, "rb")
     p = MIMEBase('application', 'octet-stream')

@@ -20,7 +20,7 @@ def stats(user_email_address,psql):
 
         # Issuer Count
         try:
-            cur.execute(f"select count(*) from cbi_user where user_category='programmaticIssuer' or user_category='singleIssuer'")
+            cur.execute(f"select count(*) from cbi_user where user_category='programmaticIssuer' or user_category='singleIssuer' or user_category='verifier'")
             issuer_count = str((cur.fetchone()[0]))
             con.commit()
         except:

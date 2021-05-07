@@ -343,6 +343,19 @@ def pre_certifications(user_email_address, psql):
             pre_certifications = []
 
             for i in data:
+
+                con = psycopg2.connect(database=psql['database'], user=psql['user'],
+                                       password=psql['password'], host=psql['host'], port=psql['port'])
+
+                cur = con.cursor()
+
+                cur.execute(f" select reviewer from cbi_certification_queue where certification_id='{i[1]}' and certification_type='pre';")
+                reviewer = str(cur.fetchone()[0])
+
+                con.commit()
+                con.close()
+
+
                 da_name = i[5]
                 if da_name is None:
                     da_name = ""
@@ -598,7 +611,8 @@ def pre_certifications(user_email_address, psql):
                              "issuerContactPerson": ca_contact_person,
                              "signature": ca_signature,
                              "caAssuranceReport": single_issuer_agreement.split("/")[-1],
-                             "gbAssuranceReport": verifier_agreement.split("/")[-1]}
+                             "gbAssuranceReport": verifier_agreement.split("/")[-1],
+                             "reviewer":reviewer}
                 pre_certifications.append(resp_data)
 
             return {'recentCertifications': pre_certifications}, 200

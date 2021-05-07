@@ -289,32 +289,33 @@ def get_certifications(user_email_address, psql):
                         "certificate": certificate,
                         "approval":approval}
                 all_certifications.append(resp_data)
-        if len(data1) != 0:
-            for i in data1:
-                certification_status = i[3]
-                if certification_status != "approved":
-                    certificate = ""
-                    approval = ""
-                else:
-                    certificate = f"certificate_"+str(i[1])+"_bond_redemption.pdf"
-                    approval = "approval_"+str(i[1])+"_bond_redemption.pdf.pdf"
-                resp_data = {"certificationId": i[1],
-                                "userEmail": i[2],
-                                "certificationStatus": i[3],
-                                "instrumentType": i[11],
-                                "certificationType": "Bond Redemption",
-                                "uniqueName": i[10],
-                                "file1": i[4].split("/")[-1],
-                                "file2": i[5].split("/")[-1],
-                                "file3": i[6].split("/")[-1],
-                                "file4": i[7].split("/")[-1],
-                                "file5": i[8].split("/")[-1],
-                                "applicationDate": i[9],
-                                "certificate": certificate,
-                                "approval": approval}
-                all_certifications.append(resp_data)
-                        
+            if len(data1) != 0:
+                for j in data1:
+                    certification_status = j[3]
+                    if certification_status != "approved":
+                        certificate = ""
+                        approval = ""
+                    else:
+                        certificate = f"certificate_"+str(j[1])+"_bond_redemption.pdf"
+                        approval = "approval_"+str(j[1])+"_bond_redemption.pdf.pdf"
+                    resp_data1 = {"certificationId": j[1],
+                                    "userEmail": j[2],
+                                    "certificationStatus": j[3],
+                                    "instrumentType": j[11],
+                                    "certificationType": "Bond Redemption",
+                                    "uniqueName": j[10],
+                                    "file1": j[4].split("/")[-1],
+                                    "file2": j[5].split("/")[-1],
+                                    "file3": j[6].split("/")[-1],
+                                    "file4": j[7].split("/")[-1],
+                                    "file5": j[8].split("/")[-1],
+                                    "applicationDate": i[9],
+                                    "certificate": certificate,
+                                    "approval": approval}
+                    all_certifications.append(resp_data1)
+                            
             return {'recentCertifications': all_certifications}, 200
+        
         else:
             return {'recentCertifications': []}, 200
 

@@ -43,7 +43,11 @@ def dashboard(user_email_address, filter_date, date_value, psql):
             assigned_certifications = []
             # if len(my_certifications) ==0:
             for i in my_certifications:
-                data = {'userCompany': i[0],'certificationId': i[1], 'applicationDate': i[2],'assignedDate': i[3],'certificationCompany': i[4], 'certificationType': i[5]}
+                if i[5]=='bond_redemption':
+                    cert_type = 'bondRedemption'
+                else:
+                    cert_type = i[5]
+                data = {'userCompany': i[0],'certificationId': i[1], 'applicationDate': i[2],'assignedDate': i[3],'certificationCompany': i[4], 'certificationType': cert_type}
                 assigned_certifications.append(data)
         except:
             assigned_certifications = "0"

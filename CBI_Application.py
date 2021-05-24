@@ -4,7 +4,7 @@ import sys
 
 import os
 
-from cbi_modules.issuer import user_login, user_register, pre_certification, issuer_certification_dashboard, post_certification, all_certifications, id_generator,bond_redemption, forgot_password, signed_agreement, annual_report
+from cbi_modules.issuer import user_login, user_register, pre_certification, issuer_certification_dashboard, post_certification, all_certifications, id_generator,bond_redemption, forgot_password, signed_agreement, annual_report, user_profile
 
 from cbi_modules.reviewer import reviewer_dashboard, submitted_certification_queue, workboard, approve_certificate, approved_queue
 
@@ -15,12 +15,6 @@ from flask_cors import CORS
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
-
-UPLOAD_FOLDER = os.path.dirname(os.path.abspath(__file__)) + '/cbi_uploads'
-
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-
-cors = CORS(app)
 
 
 UPLOAD_FOLDER = os.path.dirname(os.path.abspath(__file__)) + '/cbi_uploads'
@@ -36,6 +30,7 @@ psql = {
     "host": "143.110.213.22",
     "port": "5432"
 }
+
 @app.route("/api/register", methods=['POST','GET'])
 def register():
     if request.method == 'POST':
@@ -165,7 +160,7 @@ def submitApplication():
     return cbi_submit_response, resp
 
 
-@app.route("/api/issuerDashboard", methods=['POST', 'GET'])
+@app.route("/api/issuerDashboard", methods=['POST'])
 def issuerDashboard():
 
     data = request.json
@@ -688,26 +683,70 @@ def inviteIssuer():
     else:
         return {'error': 'Invalid User'}, 401
 
-@app.route("/api/submitAnnualReport", methods=['POST'])
+
+@app.route("/api/submitAnnualReport", methods=['POST','GET'])
 def submitAnnualReport():
-    certification_id = request.form.get('certificationId')
-    certification_type = request.form.get('certificationType')
-    try:
-        if 'annualReport' in request.files:
-            f = request.files['annualReport']
-            fname = str(certification_id)+f'_{certification_type}_annual_report.pdf'
-            file_1 = os.path.join(app.config['UPLOAD_FOLDER'], fname)
-            f.save(file_1)
+    if request.method == 'POST':
+        certification_id = request.form.get('certificationId')
+        certification_type = request.form.get('certificationType')
+        try:
+            if 'annualReport' in request.files:
+                f = request.files['annualReport']
+                fname = str(certification_id)+f'_{certification_type}_annual_report.pdf'
+                file_1 = os.path.join(app.config['UPLOAD_FOLDER'], fname)
+                f.save(file_1)
+            else:
+                file_1 =""
+
+            cbi_anual_response, resp = annual_report.upload_report(certification_id, certification_type, file_1, fname, psql)
+
+            return cbi_anual_response, resp
+        except Exception as e:
+            error = str(e)
+            msg = error
+            return {'error': msg}, 404
+    else:
+        user_email_address = request.headers.get('userEmail')
+        cbi_post_cert_response, resp = all_certifications.approved_post_certifications(user_email_address, psql)
+        return cbi_post_cert_response, resp
+
+
+@app.route("/api/profile", methods=['POST', 'GET'])
+def profile():
+    if request.method == 'POST':
+
+        data = request.json
+        user_email_address = data['userEmail']
+
+        val= user_profile.update_user(data,psql)
+
+        if val != 0:
+            cbi_user_get, resp = user_profile.get_user(user_email_address, psql)
+            return cbi_user_get, resp
         else:
-            file_1 =""
+            return {'error': 'Invalid User'}, 401
+    else:
+        user_email_address = request.headers.get('userEmail')
+        cbi_user_get, resp = user_profile.get_user(user_email_address, psql)
+        return cbi_user_get, resp
 
-        cbi_anual_response, resp = annual_report.upload_report(certification_id, certification_type, file_1, fname, psql)
 
-        return cbi_anual_response, resp
-    except Exception as e:
-        error = str(e)
-        msg = error
-        return {'error': msg}, 404
+@app.route("/api/changePassword", methods=['POST'])
+def changePassword():
+    data = request.json
+
+    cbi_pass, resp = user_profile.change_password(data, psql)
+
+    return cbi_pass, resp
+
+
+@app.route("/api/deleteCertification", methods=['POST'])
+def deleteCertification():
+    data = request.json
+
+    cbi_del_cert, resp = all_certifications.delete_certification(data, psql)
+
+    return cbi_del_cert, resp
 
 
 if __name__ == '__main__':

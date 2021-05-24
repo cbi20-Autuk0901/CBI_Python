@@ -11,7 +11,7 @@ def dashboard(data, psql):
         cur = con.cursor()
         
         try:
-            cur.execute(f"select ((select count(*) from cbi_pre_issuance_certification WHERE user_email_address='{user_email_address}')+(select count(*) from cbi_post_issuance_certification WHERE user_email_address='{user_email_address}')+(select count(*) from cbi_bond_redemption WHERE user_email_address='{user_email_address}')) as total;")
+            cur.execute(f"select ((select count(*) from cbi_pre_issuance_certification WHERE user_email_address='{user_email_address}' and certification_status!='draft')+(select count(*) from cbi_post_issuance_certification WHERE user_email_address='{user_email_address}' and certification_status!='draft')+(select count(*) from cbi_bond_redemption WHERE user_email_address='{user_email_address}')) as total;")
             total_count = str((cur.fetchone()[0]))
             con.commit()
         except:
@@ -27,7 +27,7 @@ def dashboard(data, psql):
 
         try:
             cur.execute(
-                f"select ((select count(*) from cbi_pre_issuance_certification WHERE user_email_address='{user_email_address}' AND certification_status='draft')+(select count(*) from cbi_post_issuance_certification WHERE user_email_address='{user_email_address}' AND certification_status='draft')+(select count(*) from cbi_bond_redemption WHERE user_email_address='{user_email_address}' AND certification_status='draft')) as total;")
+                f"select ((select count(*) from cbi_pre_issuance_certification WHERE user_email_address='{user_email_address}' AND certification_status='in-review')+(select count(*) from cbi_post_issuance_certification WHERE user_email_address='{user_email_address}' AND certification_status='in-review')+(select count(*) from cbi_bond_redemption WHERE user_email_address='{user_email_address}' AND certification_status='in-review')) as total;")
             draft_count = str((cur.fetchone()[0]))
             con.commit()
         except:
@@ -57,13 +57,14 @@ def dashboard(data, psql):
                     data = {'certificationId': i[1], 'instrumentType': i[4],'certificationType':'post'}
                     recent_certifications.append(data)
         except:
-            recent_certifications = "0"
+            recent_certifications = []
+
 
         try:
             cur.execute(
-                f"select t1.certification_id,t1.certification_status,t2.certification_status,t3.certification_status from cbi_pre_issuance_certification t1 left join cbi_post_issuance_certification t2 on t1.certification_id=t2.certification_id left join cbi_bond_redemption t3 on t1.certification_id=t3.certification_id where t1.user_email_address = '{user_email_address}' order by t1.ca_application_date desc limit 1;")
+                f"select t1.certification_id,t1.certification_status,t2.certification_status,t3.certification_status,t1.instrument_type from cbi_pre_issuance_certification t1 left join cbi_post_issuance_certification t2 on t1.certification_id=t2.certification_id left join cbi_bond_redemption t3 on t1.certification_id=t3.certification_id where t1.user_email_address = '{user_email_address}' order by t1.ca_application_date desc limit 1;")
             data = cur.fetchone()
-            recent_cert_status = {"certificationId": data[0], "pre": data[1], "post": data[2], "bondRedemption": data[3]}
+            recent_cert_status = {"certificationId": data[0], "pre": data[1], "post": data[2], "bondRedemption": data[3], "instrumentType": data[4]}
             con.commit()
         except:
             recent_cert_status = "0"
@@ -71,7 +72,7 @@ def dashboard(data, psql):
         con.close()
 
         if total_count == "0":
-            return {'stats': {'total': '0', 'approved': '0', 'inprogress': '0'}, 'recentCertifications': [], 'recentCertificationStatus':{}}, 200
+            return {'stats': {'total': '0', 'approved': '0', 'inprogress': '0'}, 'recentCertifications': recent_certifications, 'recentCertificationStatus': {"certificationId": None, "pre": None, "post": None, "bondRedemption": None}}, 200
         else:
             return {'stats': {'total': total_count, 'approved': submitted_count, 'inprogress': draft_count},'recentCertifications': recent_certifications,'recentCertificationStatus':recent_cert_status}, 200
 

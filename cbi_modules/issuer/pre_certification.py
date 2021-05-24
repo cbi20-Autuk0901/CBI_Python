@@ -970,7 +970,7 @@ def validate_certification(certification_id,ctype, psql):
             cur = con.cursor()
 
             cur.execute(
-                f"SELECT * from cbi_post_issuance_certification WHERE certification_id='{certification_id}' and certification_status='submitted'")
+                f"SELECT * from cbi_post_issuance_certification WHERE certification_id='{certification_id}' and certification_status='approved'")
             data = cur.fetchone()
 
             con.close()

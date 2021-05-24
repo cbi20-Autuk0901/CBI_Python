@@ -39,6 +39,10 @@ def assigned_queue(user_email_address, psql):
                         cur.execute(f"select signed_agreement from cbi_programmatic_signed_agreement WHERE invoice_company_name='{verifier[4]}'")
                         signed_doc = cur.fetchone()[0]
                         con.commit()
+                    if verifier[3].lower()=="verifier":
+                        cur.execute(f"select signed_agreement from cbi_programmatic_signed_agreement WHERE invoice_company_name='{verifier[4]}'")
+                        signed_doc = cur.fetchone()[0]
+                        con.commit()
 
                     if signed_doc is None:
                         signed_doc = ""
@@ -332,6 +336,11 @@ def assigned_queue(user_email_address, psql):
                             f"select signed_agreement from cbi_programmatic_signed_agreement WHERE invoice_company_name='{verifier[4]}'")
                         signed_doc = cur.fetchone()[0]
                         con.commit()
+                    if verifier[3].lower() == "verifier":
+                        cur.execute(
+                            f"select signed_agreement from cbi_programmatic_signed_agreement WHERE invoice_company_name='{verifier[4]}'")
+                        signed_doc = cur.fetchone()[0]
+                        con.commit()
 
                     if signed_doc is None:
                         signed_doc = ""
@@ -621,6 +630,11 @@ def assigned_queue(user_email_address, psql):
                         signed_doc = cur.fetchone()[0]
                         con.commit()
                     if verifier[3].lower() == "programmaticissuer":
+                        cur.execute(
+                            f"select signed_agreement from cbi_programmatic_signed_agreement WHERE invoice_company_name='{verifier[4]}'")
+                        signed_doc = cur.fetchone()[0]
+                        con.commit()
+                    if verifier[3].lower() == "verifier":
                         cur.execute(
                             f"select signed_agreement from cbi_programmatic_signed_agreement WHERE invoice_company_name='{verifier[4]}'")
                         signed_doc = cur.fetchone()[0]

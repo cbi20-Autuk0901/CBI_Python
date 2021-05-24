@@ -18,11 +18,17 @@ def upload_report(certification_id, certification_type, file_1, fname, psql):
     cur.execute(f"select id, certification_id, certification_type, certification_status, reviewer, application_date, assigned_date, approved_date, user_company, certification_company, instrument_type, underwriter from cbi_certification_queue where certification_id='{certification_id}' and certification_type='{certification_type}';")
     user = cur.fetchone()
 
-    con.close()
+    
 
     if user is None:
+        con.close()
         return {"error": "Invalid Certification"}, 401
     else:
+        query = "INSERT INTO CBI_Annual_Reports(certification_id,files) VALUES('{0}', '{1}'); ".format(certification_id,fname)
+        cur.execute(query)
+        con.commit()
+
+        con.close()
         mail_annual_report(file_1,fname,user[4],certification_id, certification_type)
         return {'certificationId': user[1], 'certificationType': user[2]}, 200
 

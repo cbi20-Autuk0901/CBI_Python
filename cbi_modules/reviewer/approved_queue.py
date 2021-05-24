@@ -8,7 +8,7 @@ def assigned_queue(user_email_address, psql):
     try:
 
         con = psycopg2.connect(database=psql['database'], user=psql['user'],
-                               password=psql['password'], host=psql['host'], port=psql['port'])
+                                password=psql['password'], host=psql['host'], port=psql['port'])
 
         cur = con.cursor()
 
@@ -27,6 +27,21 @@ def assigned_queue(user_email_address, psql):
                     con.commit()
 
                     cur.execute(
+                        f"SELECT string_agg(files, ',') AS file_list FROM CBI_Annual_Reports where certification_id='{i[1]}' GROUP BY certification_id;")
+                    try:
+                        annual_reports_data = str(cur.fetchone()[0]).split(",")
+                        annual_reports = []
+                        for rep_value in range(len(annual_reports_data)):
+                            heading = "Annual Report "+str(rep_value+1)
+                            rep_data = {"name": heading,
+                                        "path": annual_reports_data[rep_value]}
+                            annual_reports.append(rep_data)
+                    except:
+                        annual_reports = []
+
+                    con.commit()
+
+                    cur.execute(
                         f"SELECT user_company,user_first_name ,user_last_name,user_category,invoice_company_name from CBI_User  WHERE user_email_address='{cert_queue_data[2]}'")
                     verifier = cur.fetchone()
                     con.commit()
@@ -41,9 +56,16 @@ def assigned_queue(user_email_address, psql):
                             f"select signed_agreement from cbi_programmatic_signed_agreement WHERE invoice_company_name='{verifier[4]}'")
                         signed_doc = cur.fetchone()[0]
                         con.commit()
+                    if verifier[3].lower() == "verifier":
+                        cur.execute(
+                            f"select signed_agreement from cbi_programmatic_signed_agreement WHERE invoice_company_name='{verifier[4]}'")
+                        signed_doc = cur.fetchone()[0]
+                        con.commit()
 
                     if signed_doc is None:
                         signed_doc = ""
+                    else:
+                        annual_reports.append({"name": "Signed Agreement", "path": signed_doc.split("/")[-1]})
 
                     verifier_fname = verifier[1]
                     verifier_lname = verifier[2]
@@ -252,64 +274,89 @@ def assigned_queue(user_email_address, psql):
                     if verifier_agreement is None:
                         verifier_agreement = ""
 
+                    certification_status = cert_queue_data[3]
+                    if certification_status != "approved":
+                        certificate = ""
+                        approval = ""
+                    else:
+                        certificate = f"certificate_" + \
+                            str(cert_queue_data[1])+"_"+"pre"+".pdf"
+                        approval = "approval_"+str(cert_queue_data[1])+"_"+"pre"+".pdf"
+
+                        annual_reports.append(
+                            {"name": "Certificate", "path": certificate})
+                        annual_reports.append(
+                            {"name": "Approval", "path": approval})
+
+                    ca_assurance_report = single_issuer_agreement.split("/")[-1]
+                    if ca_assurance_report != "":
+                        annual_reports.append(
+                            {"name": "Assurance Report", "path": ca_assurance_report})
+
+                    gb_assurance_report = verifier_agreement.split("/")[-1]
+                    if gb_assurance_report != "":
+                        annual_reports.append(
+                            {"name": "Green Bond Framework", "path": gb_assurance_report})
+
                     resp_data = {"certificationId": cert_queue_data[1],
-                                 "userEmail": cert_queue_data[2],
-                                 "signedDocument": signed_doc.split("/")[-1],
-                                 "approvedDate": i[7],
-                                 "certificationStatus": cert_queue_data[3],
-                                 "instrumentType": cert_queue_data[4],
-                                 "certificationType": "pre",
-                                 "uniqueName": da_name,
-                                 "issuanceCountry": da_issuance_country,
-                                 "cusip": da_cusip,
-                                 "isin": da_isin,
-                                 "localCurrency": da_local_currency_lc,
-                                 "amountIssued": da_amount_issued_lc,
-                                 "coupon": da_coupon,
-                                 "underwriter": da_underwriter,
-                                 "issueDate": da_issue_date,
-                                 "maturityDate": da_maturity_date,
-                                 "daInstrumentType": da_instrument_type,
-                                 "renewableEnergy": d_renewable_energy,
-                                 "renewableEnergyText": d_renewable_energy_text,
-                                 "financingAssets": ps_financing_asset,
-                                 "proceedsAllocation": ps_proceeds_allocation,
-                                 "portfolioApproach": pe_portfolio_approach,
-                                 "decisionProcedure": pe_assessment_procedure,
-                                 "proceedsType": pm_proceed_type,
-                                 "proceedsProcessDetail": pm_proceed_detail,
-                                 "proceedsAllocationTiming": pm_proceed_timing,
-                                 "proceedsUse": pm_proceed_use,
-                                 "headOfficeAddress": ci_address_head_office,
-                                 "allocationReportFreq": ar_report_interval,
-                                 "allocationReportFormat": ar_report_format,
-                                 "allocationReportAccess": ar_report_access,
-                                 "allocationReportAddressLink": ar_report_link,
-                                 "breakdownInclusion": ar_report_breakdown,
-                                 "impactReportFreq": ir_report_interval,
-                                 "impactReportFormat": ir_report_format,
-                                 "impactReportAccess": ir_report_access,
-                                 "impactReportAddressLink": ir_report_link,
-                                 "quantitativeImpact": ir_report_indicators,
-                                 "vatNumber": ci_vat_number,
-                                 "businessRegistration": ci_business_reg_number,
-                                 "contactName": cp_name,
-                                 "position": cp_position,
-                                 "company": cp_company,
-                                 "contactNumber": cp_contact_number,
-                                 "invoiceName": id_name,
-                                 "applicationDate": ca_application_date,
-                                 "issuingEntityLegalName": ca_legal_name_issuing_entity,
-                                 "debtInstrumentsUniqueName": ca_unique_name_debt_instruments,
-                                 "address": ca_address,
-                                 "email": ca_email_address,
-                                 "issuerContactPerson": ca_contact_person,
-                                 "signature": ca_signature,
-                                 "caAssuranceReport": single_issuer_agreement.split("/")[-1],
-                                 "gbAssuranceReport": verifier_agreement.split("/")[-1],
-                                 "verifierCompany": verifier_company,
-                                 "verifierFirstName": verifier_fname,
-                                 "verifierLastName": verifier_lname}
+                                    "userEmail": cert_queue_data[2],
+                                    "signedDocument": signed_doc.split("/")[-1],
+                                    "approvedDate": i[7],
+                                    "certificationStatus": cert_queue_data[3],
+                                    "instrumentType": cert_queue_data[4],
+                                    "certificationType": "pre",
+                                    "uniqueName": da_name,
+                                    "issuanceCountry": da_issuance_country,
+                                    "cusip": da_cusip,
+                                    "isin": da_isin,
+                                    "localCurrency": da_local_currency_lc,
+                                    "amountIssued": da_amount_issued_lc,
+                                    "coupon": da_coupon,
+                                    "underwriter": da_underwriter,
+                                    "issueDate": da_issue_date,
+                                    "maturityDate": da_maturity_date,
+                                    "daInstrumentType": da_instrument_type,
+                                    "renewableEnergy": d_renewable_energy,
+                                    "renewableEnergyText": d_renewable_energy_text,
+                                    "financingAssets": ps_financing_asset,
+                                    "proceedsAllocation": ps_proceeds_allocation,
+                                    "portfolioApproach": pe_portfolio_approach,
+                                    "decisionProcedure": pe_assessment_procedure,
+                                    "proceedsType": pm_proceed_type,
+                                    "proceedsProcessDetail": pm_proceed_detail,
+                                    "proceedsAllocationTiming": pm_proceed_timing,
+                                    "proceedsUse": pm_proceed_use,
+                                    "headOfficeAddress": ci_address_head_office,
+                                    "allocationReportFreq": ar_report_interval,
+                                    "allocationReportFormat": ar_report_format,
+                                    "allocationReportAccess": ar_report_access,
+                                    "allocationReportAddressLink": ar_report_link,
+                                    "breakdownInclusion": ar_report_breakdown,
+                                    "impactReportFreq": ir_report_interval,
+                                    "impactReportFormat": ir_report_format,
+                                    "impactReportAccess": ir_report_access,
+                                    "impactReportAddressLink": ir_report_link,
+                                    "quantitativeImpact": ir_report_indicators,
+                                    "vatNumber": ci_vat_number,
+                                    "businessRegistration": ci_business_reg_number,
+                                    "contactName": cp_name,
+                                    "position": cp_position,
+                                    "company": cp_company,
+                                    "contactNumber": cp_contact_number,
+                                    "invoiceName": id_name,
+                                    "applicationDate": ca_application_date,
+                                    "issuingEntityLegalName": ca_legal_name_issuing_entity,
+                                    "debtInstrumentsUniqueName": ca_unique_name_debt_instruments,
+                                    "address": ca_address,
+                                    "email": ca_email_address,
+                                    "issuerContactPerson": ca_contact_person,
+                                    "signature": ca_signature,
+                                    "caAssuranceReport": single_issuer_agreement.split("/")[-1],
+                                    "gbAssuranceReport": verifier_agreement.split("/")[-1],
+                                    "verifierCompany": verifier_company,
+                                    "verifierFirstName": verifier_fname,
+                                    "verifierLastName": verifier_lname,
+                                    "downloads": annual_reports}
 
                     queue_main_data.append(resp_data)
                 elif i[2] == 'post':
@@ -319,6 +366,21 @@ def assigned_queue(user_email_address, psql):
                     con.commit()
 
                     cur.execute(
+                        f"SELECT string_agg(files, ',') AS file_list FROM CBI_Annual_Reports where certification_id='{i[1]}' GROUP BY certification_id;")
+                    try:
+                        annual_reports_data = str(cur.fetchone()[0]).split(",")
+                        annual_reports = []
+                        for rep_value in range(len(annual_reports_data)):
+                            heading = "Annual Report "+str(rep_value+1)
+                            rep_data = {"name": heading,
+                                        "path": annual_reports_data[rep_value]}
+                            annual_reports.append(rep_data)
+                    except:
+                        annual_reports = []
+
+                    con.commit()
+
+                    cur.execute(
                         f"SELECT user_company,user_first_name ,user_last_name,user_category,invoice_company_name from CBI_User  WHERE user_email_address='{cert_queue_data[2]}'")
                     verifier = cur.fetchone()
                     con.commit()
@@ -333,9 +395,16 @@ def assigned_queue(user_email_address, psql):
                             f"select signed_agreement from cbi_programmatic_signed_agreement WHERE invoice_company_name='{verifier[4]}'")
                         signed_doc = cur.fetchone()[0]
                         con.commit()
+                    if verifier[3].lower() == "verifier":
+                        cur.execute(
+                            f"select signed_agreement from cbi_programmatic_signed_agreement WHERE invoice_company_name='{verifier[4]}'")
+                        signed_doc = cur.fetchone()[0]
+                        con.commit()
 
                     if signed_doc is None:
                         signed_doc = ""
+                    else:
+                        annual_reports.append({"name": "Signed Agreement", "path": signed_doc.split("/")[-1]})
 
                     verifier_fname = verifier[1]
                     verifier_lname = verifier[2]
@@ -544,70 +613,110 @@ def assigned_queue(user_email_address, psql):
                     if verifier_agreement is None:
                         verifier_agreement = ""
 
+                    certification_status = cert_queue_data[3]
+                    if certification_status != "approved":
+                        certificate = ""
+                        approval = ""
+                    else:
+                        certificate = f"certificate_" + \
+                            str(cert_queue_data[1])+"_"+"post"+".pdf"
+                        approval = "approval_"+str(cert_queue_data[1])+"_"+"post"+".pdf"
+
+                        annual_reports.append(
+                            {"name": "Certificate", "path": certificate})
+                        annual_reports.append(
+                            {"name": "Approval", "path": approval})
+
+                    ca_assurance_report = single_issuer_agreement.split("/")[-1]
+                    if ca_assurance_report != "":
+                        annual_reports.append(
+                            {"name": "Assurance Report", "path": ca_assurance_report})
+
+                    gb_assurance_report = verifier_agreement.split("/")[-1]
+                    if gb_assurance_report != "":
+                        annual_reports.append(
+                            {"name": "Green Bond Framework", "path": gb_assurance_report})
+
                     resp_data = {"certificationId": cert_queue_data[1],
-                                 "userEmail": cert_queue_data[2],
-                                 "signedDocument": signed_doc.split("/")[-1],
-                                 "approvedDate": i[7],
-                                 "certificationStatus": cert_queue_data[3],
-                                 "instrumentType": cert_queue_data[4],
-                                 "certificationType": "post",
-                                 "uniqueName": da_name,
-                                 "issuanceCountry": da_issuance_country,
-                                 "cusip": da_cusip,
-                                 "isin": da_isin,
-                                 "localCurrency": da_local_currency_lc,
-                                 "amountIssued": da_amount_issued_lc,
-                                 "coupon": da_coupon,
-                                 "underwriter": da_underwriter,
-                                 "issueDate": da_issue_date,
-                                 "maturityDate": da_maturity_date,
-                                 "daInstrumentType": da_instrument_type,
-                                 "renewableEnergy": d_renewable_energy,
-                                 "renewableEnergyText": d_renewable_energy_text,
-                                 "financingAssets": ps_financing_asset,
-                                 "proceedsAllocation": ps_proceeds_allocation,
-                                 "portfolioApproach": pe_portfolio_approach,
-                                 "decisionProcedure": pe_assessment_procedure,
-                                 "proceedsType": pm_proceed_type,
-                                 "proceedsProcessDetail": pm_proceed_detail,
-                                 "proceedsAllocationTiming": pm_proceed_timing,
-                                 "proceedsUse": pm_proceed_use,
-                                 "headOfficeAddress": ci_address_head_office,
-                                 "allocationReportFreq": ar_report_interval,
-                                 "allocationReportFormat": ar_report_format,
-                                 "allocationReportAccess": ar_report_access,
-                                 "allocationReportAddressLink": ar_report_link,
-                                 "breakdownInclusion": ar_report_breakdown,
-                                 "impactReportFreq": ir_report_interval,
-                                 "impactReportFormat": ir_report_format,
-                                 "impactReportAccess": ir_report_access,
-                                 "impactReportAddressLink": ir_report_link,
-                                 "quantitativeImpact": ir_report_indicators,
-                                 "vatNumber": ci_vat_number,
-                                 "businessRegistration": ci_business_reg_number,
-                                 "contactName": cp_name,
-                                 "position": cp_position,
-                                 "company": cp_company,
-                                 "contactNumber": cp_contact_number,
-                                 "invoiceName": id_name,
-                                 "applicationDate": ca_application_date,
-                                 "issuingEntityLegalName": ca_legal_name_issuing_entity,
-                                 "debtInstrumentsUniqueName": ca_unique_name_debt_instruments,
-                                 "address": ca_address,
-                                 "email": ca_email_address,
-                                 "issuerContactPerson": ca_contact_person,
-                                 "signature": ca_signature,
-                                 "caAssuranceReport": single_issuer_agreement.split("/")[-1],
-                                 "gbAssuranceReport": verifier_agreement.split("/")[-1],
-                                 "verifierCompany": verifier_company,
-                                 "verifierFirstName": verifier_fname,
-                                 "verifierLastName": verifier_lname}
+                                    "userEmail": cert_queue_data[2],
+                                    "signedDocument": signed_doc.split("/")[-1],
+                                    "approvedDate": i[7],
+                                    "certificationStatus": cert_queue_data[3],
+                                    "instrumentType": cert_queue_data[4],
+                                    "certificationType": "post",
+                                    "uniqueName": da_name,
+                                    "issuanceCountry": da_issuance_country,
+                                    "cusip": da_cusip,
+                                    "isin": da_isin,
+                                    "localCurrency": da_local_currency_lc,
+                                    "amountIssued": da_amount_issued_lc,
+                                    "coupon": da_coupon,
+                                    "underwriter": da_underwriter,
+                                    "issueDate": da_issue_date,
+                                    "maturityDate": da_maturity_date,
+                                    "daInstrumentType": da_instrument_type,
+                                    "renewableEnergy": d_renewable_energy,
+                                    "renewableEnergyText": d_renewable_energy_text,
+                                    "financingAssets": ps_financing_asset,
+                                    "proceedsAllocation": ps_proceeds_allocation,
+                                    "portfolioApproach": pe_portfolio_approach,
+                                    "decisionProcedure": pe_assessment_procedure,
+                                    "proceedsType": pm_proceed_type,
+                                    "proceedsProcessDetail": pm_proceed_detail,
+                                    "proceedsAllocationTiming": pm_proceed_timing,
+                                    "proceedsUse": pm_proceed_use,
+                                    "headOfficeAddress": ci_address_head_office,
+                                    "allocationReportFreq": ar_report_interval,
+                                    "allocationReportFormat": ar_report_format,
+                                    "allocationReportAccess": ar_report_access,
+                                    "allocationReportAddressLink": ar_report_link,
+                                    "breakdownInclusion": ar_report_breakdown,
+                                    "impactReportFreq": ir_report_interval,
+                                    "impactReportFormat": ir_report_format,
+                                    "impactReportAccess": ir_report_access,
+                                    "impactReportAddressLink": ir_report_link,
+                                    "quantitativeImpact": ir_report_indicators,
+                                    "vatNumber": ci_vat_number,
+                                    "businessRegistration": ci_business_reg_number,
+                                    "contactName": cp_name,
+                                    "position": cp_position,
+                                    "company": cp_company,
+                                    "contactNumber": cp_contact_number,
+                                    "invoiceName": id_name,
+                                    "applicationDate": ca_application_date,
+                                    "issuingEntityLegalName": ca_legal_name_issuing_entity,
+                                    "debtInstrumentsUniqueName": ca_unique_name_debt_instruments,
+                                    "address": ca_address,
+                                    "email": ca_email_address,
+                                    "issuerContactPerson": ca_contact_person,
+                                    "signature": ca_signature,
+                                    "caAssuranceReport": single_issuer_agreement.split("/")[-1],
+                                    "gbAssuranceReport": verifier_agreement.split("/")[-1],
+                                    "verifierCompany": verifier_company,
+                                    "verifierFirstName": verifier_fname,
+                                    "verifierLastName": verifier_lname,
+                                    "downloads": annual_reports}
 
                     queue_main_data.append(resp_data)
                 elif i[2] == 'bond_redemption':
                     cur.execute(
                         f"select id, certification_id, user_email_address, certification_status, instrument_type, da_name, da_issuance_country, da_cusip, da_isin, da_local_currency_lc, da_amount_issued_lc, da_coupon, da_underwriter, da_issue_date, da_maturity_date, da_instrument_type, ps_financing_asset, ps_proceeds_allocation, pe_portfolio_approach, pe_assessment_procedure, pm_proceed_type, pm_proceed_detail, pm_proceed_timing, pm_proceed_use, ar_report_interval, ar_report_format, ar_report_access, ar_report_link, ar_report_breakdown, ir_report_interval, ir_report_format, ir_report_access, ir_report_link, ir_report_indicators, d_renewable_energy, d_renewable_energy_text, ci_address_head_office, ci_vat_number, ci_business_reg_number, cp_name, cp_position, cp_company, cp_contact_number, id_name, ca_application_date, ca_legal_name_issuing_entity, ca_unique_name_debt_instruments, ca_address, ca_email_address, ca_contact_person, ca_signature, single_issuer_agreement, verifier_agreement from cbi_post_issuance_certification where certification_id='{i[1]}' ;")
                     cert_queue_data = cur.fetchone()
+                    con.commit()
+
+                    cur.execute(
+                        f"SELECT string_agg(files, ',') AS file_list FROM CBI_Annual_Reports where certification_id='{j[1]}' GROUP BY certification_id;")
+                    try:
+                        annual_reports_data = str(cur.fetchone()[0]).split(",")
+                        annual_reports = []
+                        for rep_value in range(len(annual_reports_data)):
+                            heading = "Annual Report "+str(rep_value+1)
+                            rep_data = {"name": heading,
+                                        "path": annual_reports_data[rep_value]}
+                            annual_reports.append(rep_data)
+                    except:
+                        annual_reports = []
+
                     con.commit()
 
                     cur.execute(
@@ -625,9 +734,15 @@ def assigned_queue(user_email_address, psql):
                             f"select signed_agreement from cbi_programmatic_signed_agreement WHERE invoice_company_name='{verifier[4]}'")
                         signed_doc = cur.fetchone()[0]
                         con.commit()
+                    if verifier[3].lower()=="verifier":
+                        cur.execute(f"select signed_agreement from cbi_programmatic_signed_agreement WHERE invoice_company_name='{verifier[4]}'")
+                        signed_doc = cur.fetchone()[0]
+                        con.commit()
 
                     if signed_doc is None:
                         signed_doc = ""
+                    else:
+                        annual_reports.append({"name": "Signed Agreement", "path": signed_doc.split("/")[-1]})
 
                     verifier_fname = verifier[1]
                     verifier_lname = verifier[2]
@@ -841,69 +956,135 @@ def assigned_queue(user_email_address, psql):
                     if verifier_agreement is None:
                         verifier_agreement = ""
 
+                    certification_status = cert_queue_data[3]
+                    if certification_status != "approved":
+                        certificate = ""
+                        approval = ""
+                    else:
+                        certificate = f"certificate_" + \
+                            str(cert_queue_data[1])+"_bond_redemption.pdf"
+                        approval = "approval_" + \
+                            str(cert_queue_data[1])+"_bond_redemption.pdf.pdf"
+
+                        annual_reports.append(
+                            {"name": "Certificate", "path": certificate})
+                        annual_reports.append(
+                            {"name": "Approval", "path": approval})
+
+                    try:
+                        file1 = cert_queue_data_redemption[4].split("/")[-1]
+                        downloads_file1 = file1.split(".")[0].split("_")[-1]
+                        annual_reports.append(
+                            {"name": downloads_file1, "path": file1})
+                    except:
+                        file1 = ""
+                        downloads_file1 = ""
+                        annual_reports.append({"name": "", "path": ""})
+
+                    try:
+                        file2 = cert_queue_data_redemption[5].split("/")[-1]
+                        downloads_file2 = file2.split(".")[0].split("_")[-1]
+                        annual_reports.append(
+                            {"name": downloads_file2, "path": file2})
+                    except:
+                        file2 = ""
+                        downloads_file2 = ""
+                        annual_reports.append({"name": "", "path": ""})
+
+                    try:
+                        file3 = cert_queue_data_redemption[6].split("/")[-1]
+                        downloads_file3 = file3.split(".")[0].split("_")[-1]
+                        annual_reports.append(
+                            {"name": downloads_file3, "path": file3})
+                    except:
+                        file3 = ""
+                        downloads_file3 = ""
+                        annual_reports.append({"name": "", "path": ""})
+
+                    try:
+                        file4 = cert_queue_data_redemption[7].split("/")[-1]
+                        downloads_file4 = file4.split(".")[0].split("_")[-1]
+                        annual_reports.append(
+                            {"name": downloads_file4, "path": file4})
+                    except:
+                        file4 = ""
+                        downloads_file4 = ""
+                        annual_reports.append({"name": "", "path": ""})
+
+                    try:
+                        file5 = cert_queue_data_redemption[8].split("/")[-1]
+                        downloads_file5 = file5.split(".")[0].split("_")[-1]
+                        annual_reports.append(
+                            {"name": downloads_file5, "path": file5})
+                    except:
+                        file5 = ""
+                        downloads_file5 = ""
+                        annual_reports.append({"name": "", "path": ""})
+
                     resp_data = {"certificationId": cert_queue_data[1],
-                                 "userEmail": cert_queue_data[2],
-                                 "signedDocument": signed_doc.split("/")[-1],
-                                 "approvedDate": i[7],
-                                 "certificationStatus": cert_queue_data[3],
-                                 "instrumentType": cert_queue_data[4],
-                                 "certificationType": "Bond Redemption",
-                                 "uniqueName": da_name,
-                                 "issuanceCountry": da_issuance_country,
-                                 "cusip": da_cusip,
-                                 "isin": da_isin,
-                                 "localCurrency": da_local_currency_lc,
-                                 "amountIssued": da_amount_issued_lc,
-                                 "coupon": da_coupon,
-                                 "underwriter": da_underwriter,
-                                 "issueDate": da_issue_date,
-                                 "maturityDate": da_maturity_date,
-                                 "daInstrumentType": da_instrument_type,
-                                 "renewableEnergy": d_renewable_energy,
-                                 "renewableEnergyText": d_renewable_energy_text,
-                                 "financingAssets": ps_financing_asset,
-                                 "proceedsAllocation": ps_proceeds_allocation,
-                                 "portfolioApproach": pe_portfolio_approach,
-                                 "decisionProcedure": pe_assessment_procedure,
-                                 "proceedsType": pm_proceed_type,
-                                 "proceedsProcessDetail": pm_proceed_detail,
-                                 "proceedsAllocationTiming": pm_proceed_timing,
-                                 "proceedsUse": pm_proceed_use,
-                                 "headOfficeAddress": ci_address_head_office,
-                                 "allocationReportFreq": ar_report_interval,
-                                 "allocationReportFormat": ar_report_format,
-                                 "allocationReportAccess": ar_report_access,
-                                 "allocationReportAddressLink": ar_report_link,
-                                 "breakdownInclusion": ar_report_breakdown,
-                                 "impactReportFreq": ir_report_interval,
-                                 "impactReportFormat": ir_report_format,
-                                 "impactReportAccess": ir_report_access,
-                                 "impactReportAddressLink": ir_report_link,
-                                 "quantitativeImpact": ir_report_indicators,
-                                 "vatNumber": ci_vat_number,
-                                 "businessRegistration": ci_business_reg_number,
-                                 "contactName": cp_name,
-                                 "position": cp_position,
-                                 "company": cp_company,
-                                 "contactNumber": cp_contact_number,
-                                 "invoiceName": id_name,
-                                 "applicationDate": ca_application_date,
-                                 "issuingEntityLegalName": ca_legal_name_issuing_entity,
-                                 "debtInstrumentsUniqueName": ca_unique_name_debt_instruments,
-                                 "address": ca_address,
-                                 "email": ca_email_address,
-                                 "issuerContactPerson": ca_contact_person,
-                                 "signature": ca_signature,
-                                 "caAssuranceReport": single_issuer_agreement.split("/")[-1],
-                                 "gbAssuranceReport": verifier_agreement.split("/")[-1],
-                                 "file1": cert_queue_data_redemption[4].split("/")[-1],
-                                 "file2": cert_queue_data_redemption[5].split("/")[-1],
-                                 "file3": cert_queue_data_redemption[6].split("/")[-1],
-                                 "file4": cert_queue_data_redemption[7].split("/")[-1],
-                                 "file5": cert_queue_data_redemption[8].split("/")[-1],
-                                 "verifierCompany": verifier_company,
-                                 "verifierFirstName": verifier_fname,
-                                 "verifierLastName": verifier_lname}
+                                    "userEmail": cert_queue_data[2],
+                                    "signedDocument": signed_doc.split("/")[-1],
+                                    "approvedDate": i[7],
+                                    "certificationStatus": cert_queue_data[3],
+                                    "instrumentType": cert_queue_data[4],
+                                    "certificationType": "Bond Redemption",
+                                    "uniqueName": da_name,
+                                    "issuanceCountry": da_issuance_country,
+                                    "cusip": da_cusip,
+                                    "isin": da_isin,
+                                    "localCurrency": da_local_currency_lc,
+                                    "amountIssued": da_amount_issued_lc,
+                                    "coupon": da_coupon,
+                                    "underwriter": da_underwriter,
+                                    "issueDate": da_issue_date,
+                                    "maturityDate": da_maturity_date,
+                                    "daInstrumentType": da_instrument_type,
+                                    "renewableEnergy": d_renewable_energy,
+                                    "renewableEnergyText": d_renewable_energy_text,
+                                    "financingAssets": ps_financing_asset,
+                                    "proceedsAllocation": ps_proceeds_allocation,
+                                    "portfolioApproach": pe_portfolio_approach,
+                                    "decisionProcedure": pe_assessment_procedure,
+                                    "proceedsType": pm_proceed_type,
+                                    "proceedsProcessDetail": pm_proceed_detail,
+                                    "proceedsAllocationTiming": pm_proceed_timing,
+                                    "proceedsUse": pm_proceed_use,
+                                    "headOfficeAddress": ci_address_head_office,
+                                    "allocationReportFreq": ar_report_interval,
+                                    "allocationReportFormat": ar_report_format,
+                                    "allocationReportAccess": ar_report_access,
+                                    "allocationReportAddressLink": ar_report_link,
+                                    "breakdownInclusion": ar_report_breakdown,
+                                    "impactReportFreq": ir_report_interval,
+                                    "impactReportFormat": ir_report_format,
+                                    "impactReportAccess": ir_report_access,
+                                    "impactReportAddressLink": ir_report_link,
+                                    "quantitativeImpact": ir_report_indicators,
+                                    "vatNumber": ci_vat_number,
+                                    "businessRegistration": ci_business_reg_number,
+                                    "contactName": cp_name,
+                                    "position": cp_position,
+                                    "company": cp_company,
+                                    "contactNumber": cp_contact_number,
+                                    "invoiceName": id_name,
+                                    "applicationDate": ca_application_date,
+                                    "issuingEntityLegalName": ca_legal_name_issuing_entity,
+                                    "debtInstrumentsUniqueName": ca_unique_name_debt_instruments,
+                                    "address": ca_address,
+                                    "email": ca_email_address,
+                                    "issuerContactPerson": ca_contact_person,
+                                    "signature": ca_signature,
+                                    "caAssuranceReport": single_issuer_agreement.split("/")[-1],
+                                    "gbAssuranceReport": verifier_agreement.split("/")[-1],
+                                    "file1": cert_queue_data_redemption[4].split("/")[-1],
+                                    "file2": cert_queue_data_redemption[5].split("/")[-1],
+                                    "file3": cert_queue_data_redemption[6].split("/")[-1],
+                                    "file4": cert_queue_data_redemption[7].split("/")[-1],
+                                    "file5": cert_queue_data_redemption[8].split("/")[-1],
+                                    "verifierCompany": verifier_company,
+                                    "verifierFirstName": verifier_fname,
+                                    "verifierLastName": verifier_lname,
+                                    "downloads": annual_reports}
 
                     queue_main_data.append(resp_data)
 

@@ -792,6 +792,11 @@ def step_three_get(user_email_address, certification_id, psql):
         cur.execute(
             f"SELECT ca_application_date, ca_legal_name_issuing_entity, ca_unique_name_debt_instruments, ca_address, ca_email_address, ca_contact_person, ca_signature from cbi_post_issuance_certification  WHERE user_email_address='{user_email_address}' and certification_id='{certification_id}'")
         data = cur.fetchone()
+        con.commit()
+
+        cur.execute(f" select reviewer from cbi_certification_queue where certification_id='{certification_id}' and certification_type='pre';")
+        reviewer = str(cur.fetchone()[0])
+        con.commit()
 
         con.close()
 
@@ -833,7 +838,8 @@ def step_three_get(user_email_address, certification_id, psql):
                 "email": ca_email_address,
                 "issuerContactPerson": ca_contact_person,
                 "signature": ca_signature,
-                "agreement": "agreement"+"_"+str(certification_id)+".pdf"}, 200
+                "agreement": "agreement"+"_"+str(certification_id)+".pdf",
+                "reviewer": reviewer}, 200
 
     except Exception as e:
         error = str(e)

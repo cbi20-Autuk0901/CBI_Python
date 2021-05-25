@@ -31,6 +31,9 @@ def assigned_queue(user_email_address, psql):
                     verifier = cur.fetchone()
                     con.commit()
 
+                    if verifier is None:
+                        verifier = ["", "", "", ""]
+
                     if verifier[3].lower()=="singleissuer":
                         cur.execute(f"select signed_agreement from cbi_single_signed_agreement WHERE certification_id='{cert_queue_data[1]}'")
                         signed_doc = cur.fetchone()[0]
@@ -44,8 +47,11 @@ def assigned_queue(user_email_address, psql):
                         signed_doc = cur.fetchone()[0]
                         con.commit()
 
+
                     if signed_doc is None:
                         signed_doc = ""
+                    else:
+                        signed_doc = signed_doc.split("/")[-1]
 
 
                     verifier_fname = verifier[1]
@@ -250,14 +256,18 @@ def assigned_queue(user_email_address, psql):
                     single_issuer_agreement = cert_queue_data[51]
                     if single_issuer_agreement is None:
                         single_issuer_agreement = ""
+                    else:
+                        single_issuer_agreement = single_issuer_agreement.split("/")[-1]
 
                     verifier_agreement = cert_queue_data[52]
                     if verifier_agreement is None:
                         verifier_agreement = ""
+                    else:
+                        verifier_agreement = verifier_agreement.split("/")[-1]
 
                     resp_data = {"certificationId": cert_queue_data[1],
                                     "userEmail": cert_queue_data[2],
-                                    "signedDocument": signed_doc.split("/")[-1],
+                                    "signedDocument": signed_doc,
                                     "approvedDate":i[7],
                                     "certificationStatus": cert_queue_data[3],
                                     "instrumentType": cert_queue_data[4],
@@ -308,8 +318,8 @@ def assigned_queue(user_email_address, psql):
                                     "email": ca_email_address,
                                     "issuerContactPerson": ca_contact_person,
                                     "signature": ca_signature,
-                                    "caAssuranceReport": single_issuer_agreement.split("/")[-1],
-                                    "gbAssuranceReport": verifier_agreement.split("/")[-1],
+                                    "caAssuranceReport": single_issuer_agreement,
+                                    "gbAssuranceReport": verifier_agreement,
                                     "verifierCompany": verifier_company,
                                     "verifierFirstName": verifier_fname,
                                     "verifierLastName": verifier_lname}
@@ -325,6 +335,9 @@ def assigned_queue(user_email_address, psql):
                         f"SELECT user_company,user_first_name ,user_last_name,user_category,invoice_company_name from CBI_User  WHERE user_email_address='{cert_queue_data[2]}'")
                     verifier = cur.fetchone()
                     con.commit()
+
+                    if verifier is None:
+                        verifier = ["", "", "", ""]
 
                     if verifier[3].lower() == "singleissuer":
                         cur.execute(
@@ -342,8 +355,11 @@ def assigned_queue(user_email_address, psql):
                         signed_doc = cur.fetchone()[0]
                         con.commit()
 
+
                     if signed_doc is None:
                         signed_doc = ""
+                    else:
+                        signed_doc = signed_doc.split("/")[-1]
 
 
                     verifier_fname = verifier[1]
@@ -548,14 +564,18 @@ def assigned_queue(user_email_address, psql):
                     single_issuer_agreement = cert_queue_data[51]
                     if single_issuer_agreement is None:
                         single_issuer_agreement = ""
+                    else:
+                        single_issuer_agreement = single_issuer_agreement.split("/")[-1]
 
                     verifier_agreement = cert_queue_data[52]
                     if verifier_agreement is None:
                         verifier_agreement = ""
+                    else:
+                        verifier_agreement = verifier_agreement.split("/")[-1]
 
                     resp_data = {"certificationId": cert_queue_data[1],
                                     "userEmail": cert_queue_data[2],
-                                    "signedDocument": signed_doc.split("/")[-1],
+                                    "signedDocument": signed_doc,
                                     "approvedDate": i[7],
                                     "certificationStatus": cert_queue_data[3],
                                     "instrumentType": cert_queue_data[4],
@@ -606,8 +626,8 @@ def assigned_queue(user_email_address, psql):
                                     "email": ca_email_address,
                                     "issuerContactPerson": ca_contact_person,
                                     "signature": ca_signature,
-                                    "caAssuranceReport": single_issuer_agreement.split("/")[-1],
-                                    "gbAssuranceReport": verifier_agreement.split("/")[-1],
+                                    "caAssuranceReport": single_issuer_agreement,
+                                    "gbAssuranceReport": verifier_agreement,
                                     "verifierCompany": verifier_company,
                                     "verifierFirstName": verifier_fname,
                                     "verifierLastName": verifier_lname}
@@ -623,6 +643,9 @@ def assigned_queue(user_email_address, psql):
                         f"SELECT user_company,user_first_name ,user_last_name,user_category,invoice_company_name from CBI_User  WHERE user_email_address='{cert_queue_data[2]}'")
                     verifier = cur.fetchone()
                     con.commit()
+
+                    if verifier is None:
+                        verifier = ["","","",""]
 
                     if verifier[3].lower() == "singleissuer":
                         cur.execute(
@@ -642,6 +665,8 @@ def assigned_queue(user_email_address, psql):
 
                     if signed_doc is None:
                         signed_doc = ""
+                    else:
+                        signed_doc = signed_doc.split("/")[-1]
 
 
                     verifier_fname = verifier[1]
@@ -851,14 +876,18 @@ def assigned_queue(user_email_address, psql):
                     single_issuer_agreement = cert_queue_data[51]
                     if single_issuer_agreement is None:
                         single_issuer_agreement = ""
+                    else:
+                        single_issuer_agreement = single_issuer_agreement.split("/")[-1]
 
                     verifier_agreement = cert_queue_data[52]
                     if verifier_agreement is None:
                         verifier_agreement = ""
+                    else:
+                        verifier_agreement = verifier_agreement.split("/")[-1]
 
                     resp_data = {"certificationId": cert_queue_data[1],
                                     "userEmail": cert_queue_data[2],
-                                    "signedDocument": signed_doc.split("/")[-1],
+                                    "signedDocument": signed_doc,
                                     "approvedDate": i[7],
                                     "certificationStatus": cert_queue_data[3],
                                     "instrumentType": cert_queue_data[4],
@@ -909,13 +938,13 @@ def assigned_queue(user_email_address, psql):
                                     "email": ca_email_address,
                                     "issuerContactPerson": ca_contact_person,
                                     "signature": ca_signature,
-                                    "caAssuranceReport": single_issuer_agreement.split("/")[-1],
-                                    "gbAssuranceReport": verifier_agreement.split("/")[-1],
-                                    "file1": cert_queue_data_redemption[4].split("/")[-1],
-                                    "file2": cert_queue_data_redemption[5].split("/")[-1],
-                                    "file3": cert_queue_data_redemption[6].split("/")[-1],
-                                    "file4": cert_queue_data_redemption[7].split("/")[-1],
-                                    "file5": cert_queue_data_redemption[8].split("/")[-1],
+                                    "caAssuranceReport": single_issuer_agreement,
+                                    "gbAssuranceReport": verifier_agreement,
+                                    "file1": cert_queue_data_redemption[4].split("/")[-1] if cert_queue_data_redemption[4] is not None else "",
+                                    "file2": cert_queue_data_redemption[5].split("/")[-1] if cert_queue_data_redemption[5] is not None else "",
+                                    "file3": cert_queue_data_redemption[6].split("/")[-1] if cert_queue_data_redemption[6] is not None else "",
+                                    "file4": cert_queue_data_redemption[7].split("/")[-1] if cert_queue_data_redemption[7] is not None else "",
+                                    "file5": cert_queue_data_redemption[8].split("/")[-1] if cert_queue_data_redemption[8] is not None else "",
                                     "verifierCompany": verifier_company,
                                     "verifierFirstName": verifier_fname,
                                     "verifierLastName": verifier_lname}

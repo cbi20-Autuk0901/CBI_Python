@@ -46,6 +46,9 @@ def assigned_queue(user_email_address, psql):
                     verifier = cur.fetchone()
                     con.commit()
 
+                    if verifier is None:
+                        verifier = ["", "", "", ""]
+
                     if verifier[3].lower() == "singleissuer":
                         cur.execute(
                             f"select signed_agreement from cbi_single_signed_agreement WHERE certification_id='{cert_queue_data[1]}'")
@@ -385,6 +388,9 @@ def assigned_queue(user_email_address, psql):
                     verifier = cur.fetchone()
                     con.commit()
 
+                    if verifier is None:
+                        verifier = ["", "", "", ""]
+
                     if verifier[3].lower() == "singleissuer":
                         cur.execute(
                             f"select signed_agreement from cbi_single_signed_agreement WHERE certification_id='{cert_queue_data[1]}'")
@@ -723,6 +729,9 @@ def assigned_queue(user_email_address, psql):
                         f"SELECT user_company,user_first_name ,user_last_name,user_category,invoice_company_name from CBI_User  WHERE user_email_address='{cert_queue_data[2]}'")
                     verifier = cur.fetchone()
                     con.commit()
+
+                    if verifier is None:
+                        verifier = ["", "", "", ""]
 
                     if verifier[3].lower() == "singleissuer":
                         cur.execute(

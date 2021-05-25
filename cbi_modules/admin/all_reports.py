@@ -460,7 +460,6 @@ def get_certifications(psql):
                     except:
                         file1 = ""
                         downloads_file1 = ""
-                        annual_reports.append({"name":"","path": ""})
 
                     try:
                         file2 = j[5].split("/")[-1]
@@ -469,7 +468,6 @@ def get_certifications(psql):
                     except:
                         file2 = ""
                         downloads_file2 = ""
-                        annual_reports.append({"name":"","path": ""})
 
                     try:
                         file3 = j[6].split("/")[-1]
@@ -478,7 +476,6 @@ def get_certifications(psql):
                     except:
                         file3 = ""
                         downloads_file3 = ""
-                        annual_reports.append({"name":"","path": ""})
 
                     try:
                         file4 = j[7].split("/")[-1]
@@ -487,7 +484,6 @@ def get_certifications(psql):
                     except:
                         file4 = ""
                         downloads_file4 = ""
-                        annual_reports.append({"name":"","path": ""})
 
                     try:
                         file5 = j[8].split("/")[-1]
@@ -496,7 +492,6 @@ def get_certifications(psql):
                     except:
                         file5 = ""
                         downloads_file5 = ""
-                        annual_reports.append({"name":"","path": ""})
 
 
                     resp_data1 = {"certificationId": j[1],
@@ -510,7 +505,7 @@ def get_certifications(psql):
                                     "file3": file3,
                                     "file4": file4,
                                     "file5": file5,
-                                    "applicationDate": i[9],
+                                    "applicationDate": j[9],
                                     "certificate": certificate,
                                     "approval": approval,
                                     "reviewer": reviewer,

@@ -988,7 +988,6 @@ def assigned_queue(user_email_address, psql):
                     except:
                         file1 = ""
                         downloads_file1 = ""
-                        annual_reports.append({"name": "", "path": ""})
 
                     try:
                         file2 = cert_queue_data_redemption[5].split("/")[-1]
@@ -998,7 +997,6 @@ def assigned_queue(user_email_address, psql):
                     except:
                         file2 = ""
                         downloads_file2 = ""
-                        annual_reports.append({"name": "", "path": ""})
 
                     try:
                         file3 = cert_queue_data_redemption[6].split("/")[-1]
@@ -1008,7 +1006,6 @@ def assigned_queue(user_email_address, psql):
                     except:
                         file3 = ""
                         downloads_file3 = ""
-                        annual_reports.append({"name": "", "path": ""})
 
                     try:
                         file4 = cert_queue_data_redemption[7].split("/")[-1]
@@ -1018,17 +1015,14 @@ def assigned_queue(user_email_address, psql):
                     except:
                         file4 = ""
                         downloads_file4 = ""
-                        annual_reports.append({"name": "", "path": ""})
 
                     try:
                         file5 = cert_queue_data_redemption[8].split("/")[-1]
                         downloads_file5 = file5.split(".")[0].split("_")[-1]
-                        annual_reports.append(
-                            {"name": downloads_file5, "path": file5})
+                        annual_reports.append({"name": downloads_file5, "path": file5})
                     except:
                         file5 = ""
                         downloads_file5 = ""
-                        annual_reports.append({"name": "", "path": ""})
 
                     resp_data = {"certificationId": cert_queue_data[1],
                                     "userEmail": cert_queue_data[2],

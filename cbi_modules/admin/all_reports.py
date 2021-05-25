@@ -52,6 +52,9 @@ def get_certifications(psql):
                 verifier = cur.fetchone()
                 con.commit()
 
+                if verifier is None:
+                    verifier = ["", "", "", ""]
+
                 signed_doc = None
                 if verifier[3].lower() == "singleissuer":
                     cur.execute(
@@ -399,6 +402,9 @@ def get_certifications(psql):
                         f"SELECT user_company,user_first_name ,user_last_name,user_category,invoice_company_name from CBI_User  WHERE user_email_address='{j[2]}'")
                     verifier = cur.fetchone()
                     con.commit()
+
+                    if verifier is None:
+                        verifier = ["", "", "", ""]
 
                     signed_doc = None
                     if verifier[3].lower() == "singleissuer":

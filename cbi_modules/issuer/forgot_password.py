@@ -26,7 +26,7 @@ def reset(user_email_address,psql):
         con.close()
 
         if data is not None:
-            res = ''.join(random.choices(string.ascii_uppercase+string.ascii_lowercase+string.digits+string.punctuation, k=8))
+            res = ''.join(random.choices(string.ascii_uppercase+string.ascii_lowercase+string.digits, k=8))
             mail(user_email_address,res)
             con = psycopg2.connect(database=psql['database'], user=psql['user'],
                                    password=psql['password'], host=psql['host'], port=psql['port'])

@@ -155,15 +155,11 @@ def mail_issuer_pre(cert_id, cert_type, issuer_name, da_name, user_email):
             3) The Certification Mark file <br>
             4) Guidance on using the Certification Mark
             <br><br>
-            Please be in touch with Leena Fatin (leena.fatin@climatebonds.net) from the Climate Bonds Initiative Communications Team who can coordinate with you in case you plan to do any communications associated 
+            Please be in touch with our communications team (leena.fatin@climatebonds.net) from the Climate Bonds Initiative Communications Team who can coordinate with you in case you plan to do any communications associated with the issuance of this bond. 
             <br><br>
-            After your issuance, we will be producing an entry for our <a href="https://climatebonds.net/bond-library">Bond Library</a> and publishing the relevant documents on our <a href="https://www.climatebonds.net/certification/certified-bonds">Listing of Certified Bonds</a> on the Climate Bonds Initiative website. 
+            After your issuance, we will be producing an entry for our <a href="https://climatebonds.net/bond-library">Bond Library</a> and publishing the relevant documents on our <a href="https://www.climatebonds.net/certification/certified-bonds">Listing of Certified Bonds</a> on the Climate Bonds Initiative website. We will also send you an invoice for the Certification Fee, as per our signed Certification Agreement.
             <br><br>
-            We will also send you an invoice for the Certification Fee, which is calculated as 1/10 of one basis point of the par value of the issuance. For example, an issuance of USD 500m will have a fee of USD 5000. 
-            <br><br>
-            Please let us know if you have any questions or if there is anything we can do to help.  
-            <br><br>
-            Thank you again for your interest in Certification.  
+            Please do not hesitate to contact us for clarifications or if there is anything we can do to help.  
             <br><br>
             Congratulations on your Certification! 
             <br>
@@ -220,8 +216,8 @@ def mail_issuer_pre(cert_id, cert_type, issuer_name, da_name, user_email):
 def mail_issuer_post(cert_id, cert_type, issuer_name, da_name, user_email):
     paths = os.path.dirname(os.path.abspath(__file__)).replace("\\", "/")
 
-    filename1 = "certificate_"+str(cert_id)+"_"+str(cert_type)+".pdf"
-    filepath1 = '/var/www/html/cbi-api/cbi_uploads/'+filename1
+    # filename1 = "certificate_"+str(cert_id)+"_"+str(cert_type)+".pdf"
+    # filepath1 = '/var/www/html/cbi-api/cbi_uploads/'+filename1
 
     filename2 = "approval_"+str(cert_id)+"_"+str(cert_type)+".pdf"
     filepath2 = '/var/www/html/cbi-api/cbi_uploads/'+filename2
@@ -237,7 +233,6 @@ def mail_issuer_post(cert_id, cert_type, issuer_name, da_name, user_email):
 
     body = f"""
             <html>
-            <head>Testing Emails</head>
             <body><style> p {{ font-family: Palatino Linotype;}}</style><p>
             Dear {issuer_name}, <br><br>
  
@@ -246,17 +241,14 @@ def mail_issuer_post(cert_id, cert_type, issuer_name, da_name, user_email):
             Please find attached the following documents for the Certification:  
             <br><br>
             1) A formal Letter of Certification for your records <br>
-            2) A Certificate, for your promotional efforts <br>
-            3) The Certification Mark file <br>
-            4) Guidance on using the Certification Mark
+            2) The Certification Mark file <br>
+            3) Guidance on using the Certification Mark
             <br><br>
-            After your issuance, we will be producing an entry for our <a href="https://climatebonds.net/bond-library">Bond Library</a> and publishing the relevant documents on our <a href="https://www.climatebonds.net/certification/certified-bonds">Listing of Certified Bonds</a> on the Climate Bonds Initiative website. 
+            We will proceed to add an entry for our <a href="https://climatebonds.net/bond-library">Bond Library</a> and publish the relevant documents on our <a href="https://www.climatebonds.net/certification/certified-bonds">Listing of Certified Bonds</a> on the Climate Bonds Initiative website. 
             <br><br><br>
-            We will also send you an invoice for the Certification Fee, which is calculated as 1/10 of one basis point of the par value of the issuance. For example, an issuance of USD 500m will have a fee of USD 5000. 
+            Please be in touch with our communications team (leena.fatin@climatebonds.net) from the Climate Bonds Initiative Communications Team who can coordinate with you in case you plan to do any communications associated with the post issuance certification of this bond. 
             <br><br>
-            Please let us know if you have any questions or if there is anything we can do to help.  
-            <br><br>
-            Thank you again for your interest in Certification.  
+            Please do not hesitate to contact us for clarifications or if there is anything we can do to help.   
             <br><br>
             Congratulations on your Certification! 
             <br>
@@ -272,13 +264,13 @@ def mail_issuer_post(cert_id, cert_type, issuer_name, da_name, user_email):
     msg['From'] = sender
     msg['To'] = recipient#", ".join(recipient)
 
-    attachment = open(filepath1, "rb")
-    p = MIMEBase('application', 'octet-stream')
-    p.set_payload((attachment).read())
-    encoders.encode_base64(p)
-    p.add_header('Content-Disposition',
-                 "attachment; filename= %s" % filename1)
-    msg.attach(p)
+    # attachment = open(filepath1, "rb")
+    # p = MIMEBase('application', 'octet-stream')
+    # p.set_payload((attachment).read())
+    # encoders.encode_base64(p)
+    # p.add_header('Content-Disposition',
+    #              "attachment; filename= %s" % filename1)
+    # msg.attach(p)
 
     attachment1 = open(filepath2, "rb")
     p1 = MIMEBase('application', 'octet-stream')

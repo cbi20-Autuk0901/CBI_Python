@@ -29,7 +29,7 @@ def redeem(certification_id, user_email_address, file_1, file_2,file3, file4, fi
             now= datetime.now()
 
             query = "INSERT INTO cbi_bond_redemption(certification_id,user_email_address,certification_status,file1,file2,file3,file4,file5, application_date) VALUES('{0}', '{1}','{2}','{3}','{4}','{5}','{6}','{7}','{8}'); ".format(
-                certification_id, user_email_address, certification_status,file_1,file_2,file3,file4,file5,now)
+                certification_id, user_email_address.replace("'","''"), certification_status.replace("'","''"),file_1.replace("'","''"),file_2.replace("'","''"),file3.replace("'","''"),file4.replace("'","''"),file5.replace("'","''"),now)
             cur.execute(query)
             con.commit()
 
@@ -40,7 +40,7 @@ def redeem(certification_id, user_email_address, file_1, file_2,file3, file4, fi
             user_data = cur.fetchone()
 
             query = "INSERT INTO CBI_Certification_Queue(certification_id,certification_type,certification_status,application_date,user_company,certification_company,instrument_type,underwriter) VALUES('{0}', '{1}','{2}','{3}','{4}','{5}','{6}','{7}'); ".format(
-                certification_id, 'bond_redemption', 'approved', now, user_data[0], cert_data[2], cert_data[0], cert_data[1])
+                certification_id, 'bond_redemption', 'submitted', now, user_data[0].replace("'", "''"), cert_data[2].replace("'", "''"), cert_data[0].replace("'", "''"), cert_data[1].replace("'", "''"))
             cur.execute(query)
             con.commit()
             con.close()

@@ -22,7 +22,8 @@ def single_signed_doc(certification_id, user_email_address, file_1, psql):
                 con.commit()
                 return {'certificationId': certification_id, 'userEmail': user_email_address, "signedCertificationAgreement": file_1}, 200
             elif data is None:
-                query = "INSERT INTO cbi_single_signed_agreement(certification_id,user_email_address,signed_agreement,application_date) VALUES('{0}', '{1}','{2}','{3}'); ".format(certification_id, user_email_address, file_1, now)
+                query = "INSERT INTO cbi_single_signed_agreement(certification_id,user_email_address,signed_agreement,application_date) VALUES('{0}', '{1}','{2}','{3}'); ".format(
+                    certification_id, user_email_address, file_1.replace("'", "''"), now)
                 cur.execute(query)
                 con.commit()
             con.close()
@@ -61,7 +62,8 @@ def programmatic_signed_doc(certification_id, user_email_address, file_1, psql):
                     con.commit()
                     return {'certificationId': certification_id, 'userEmail': user_email_address, "signedCertificationAgreement": file_1}, 200
                 elif data is None:
-                    query = "INSERT INTO cbi_programmatic_signed_agreement(invoice_company_name,user_email_address,signed_agreement,application_date) VALUES('{0}', '{1}','{2}','{3}'); ".format(company, user_email_address, file_1, now)
+                    query = "INSERT INTO cbi_programmatic_signed_agreement(invoice_company_name,user_email_address,signed_agreement,application_date) VALUES('{0}', '{1}','{2}','{3}'); ".format(
+                        company, user_email_address, file_1.replace("'", "''"), now)
                     cur.execute(query)
                     con.commit()
                 con.close()
@@ -167,7 +169,7 @@ def verifier_signed_doc(certification_id, user_email_address, file_1, psql):
                     return {'certificationId': certification_id, 'userEmail': user_email_address, "signedCertificationAgreement": file_1}, 200
                 elif data is None:
                     query = "INSERT INTO cbi_programmatic_signed_agreement(invoice_company_name,user_email_address,signed_agreement,application_date) VALUES('{0}', '{1}','{2}','{3}'); ".format(
-                        company, user_email_address, file_1, now)
+                        company, user_email_address, file_1.replace("'", "''"), now)
                     cur.execute(query)
                     con.commit()
                 con.close()

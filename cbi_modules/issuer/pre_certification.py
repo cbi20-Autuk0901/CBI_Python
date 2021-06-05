@@ -17,7 +17,7 @@ def step_one(data, psql):
 
         cur = con.cursor()
 
-        da_name = data['uniqueName']
+        da_name = data['uniqueName'].replace("'", "''")
         if len(da_name) > 0:
             cur.execute(
                 f"UPDATE cbi_pre_issuance_certification SET da_name='{da_name}' WHERE user_email_address='{user_email_address}' AND certification_id='{certification_id}'; ")
@@ -25,7 +25,7 @@ def step_one(data, psql):
         else:
             pass
 
-        da_issuance_country = data['issuanceCountry']
+        da_issuance_country = data['issuanceCountry'].replace("'", "''")
         if len(da_issuance_country) > 0:
             cur.execute(
                 f"UPDATE cbi_pre_issuance_certification SET da_issuance_country='{da_issuance_country}' WHERE user_email_address='{user_email_address}' AND certification_id='{certification_id}'; ")
@@ -33,7 +33,7 @@ def step_one(data, psql):
         else:
             pass
 
-        da_cusip = data['cusip']
+        da_cusip = data['cusip'].replace("'", "''")
         if len(da_cusip) > 0:
             cur.execute(
                 f"UPDATE cbi_pre_issuance_certification SET da_cusip='{da_cusip}' WHERE user_email_address='{user_email_address}' AND certification_id='{certification_id}'; ")
@@ -43,14 +43,14 @@ def step_one(data, psql):
 
         da_local_currency_lc = data['localCurrency']
         if len(da_local_currency_lc) > 0:
-            da_local_currency_lc = "~".join(da_local_currency_lc)
+            da_local_currency_lc = "~".join(da_local_currency_lc).replace("'", "''")
             cur.execute(
                 f"UPDATE cbi_pre_issuance_certification SET da_local_currency_lc='{da_local_currency_lc}' WHERE user_email_address='{user_email_address}' AND certification_id='{certification_id}'; ")
             con.commit()
         else:
             pass
 
-        da_isin = data['isin']
+        da_isin = data['isin'].replace("'", "''")
         if len(da_isin) > 0:
             cur.execute(
                 f"UPDATE cbi_pre_issuance_certification SET da_isin='{da_isin}' WHERE user_email_address='{user_email_address}' AND certification_id='{certification_id}'; ")
@@ -60,14 +60,15 @@ def step_one(data, psql):
 
         da_amount_issued_lc = data['amountIssued']
         if len(da_amount_issued_lc) > 0:
-            da_amount_issued_lc = "~".join(da_amount_issued_lc)
+            da_amount_issued_lc = "~".join(
+                da_amount_issued_lc).replace("'", "''")
             cur.execute(
                 f"UPDATE cbi_pre_issuance_certification SET da_amount_issued_lc='{da_amount_issued_lc}' WHERE user_email_address='{user_email_address}' AND certification_id='{certification_id}'; ")
             con.commit()
         else:
             pass
 
-        da_coupon = data['coupon']
+        da_coupon = data['coupon'].replace("'", "''")
         if len(da_coupon) > 0:
             cur.execute(
                 f"UPDATE cbi_pre_issuance_certification SET da_coupon='{da_coupon}' WHERE user_email_address='{user_email_address}' AND certification_id='{certification_id}'; ")
@@ -77,9 +78,8 @@ def step_one(data, psql):
 
         da_underwriter = data['underwriter']
         if len(da_underwriter) > 0:
-            da_underwriter = "~".join(da_underwriter)
-            cur.execute(
-                f"UPDATE cbi_pre_issuance_certification SET da_underwriter='{da_underwriter}' WHERE user_email_address='{user_email_address}' AND certification_id='{certification_id}'; ")
+            da_underwriter = "~".join(da_underwriter).replace("'", "''")
+            cur.execute(f"UPDATE cbi_pre_issuance_certification SET da_underwriter='{da_underwriter}' WHERE user_email_address='{user_email_address}' AND certification_id='{certification_id}'")
             con.commit()
         else:
             pass
@@ -100,7 +100,7 @@ def step_one(data, psql):
         else:
             pass
 
-        da_instrument_type = data['daInstrumentType']
+        da_instrument_type = data['daInstrumentType'].replace("'", "''")
         if len(da_instrument_type) > 0:
             cur.execute(
                 f"UPDATE cbi_pre_issuance_certification SET da_instrument_type='{da_instrument_type}' WHERE user_email_address='{user_email_address}' AND certification_id='{certification_id}'; ")
@@ -108,7 +108,7 @@ def step_one(data, psql):
         else:
             pass
 
-        ps_financing_asset = data['financingAssets']
+        ps_financing_asset = data['financingAssets'].replace("'", "''")
         if len(ps_financing_asset) > 0:
             cur.execute(
                 f"UPDATE cbi_pre_issuance_certification SET ps_financing_asset='{ps_financing_asset}' WHERE user_email_address='{user_email_address}' AND certification_id='{certification_id}'; ")
@@ -116,7 +116,7 @@ def step_one(data, psql):
         else:
             pass
 
-        ps_proceeds_allocation = data['proceedsAllocation']
+        ps_proceeds_allocation = data['proceedsAllocation'].replace("'", "''")
         if len(ps_proceeds_allocation) > 0:
             cur.execute(
                 f"UPDATE cbi_pre_issuance_certification SET ps_proceeds_allocation='{ps_proceeds_allocation}' WHERE user_email_address='{user_email_address}' AND certification_id='{certification_id}'; ")
@@ -124,7 +124,7 @@ def step_one(data, psql):
         else:
             pass
 
-        pe_portfolio_approach = data['portfolioApproach']
+        pe_portfolio_approach = data['portfolioApproach'].replace("'", "''")
         if len(pe_portfolio_approach) > 0:
             cur.execute(
                 f"UPDATE cbi_pre_issuance_certification SET pe_portfolio_approach='{pe_portfolio_approach}' WHERE user_email_address='{user_email_address}' AND certification_id='{certification_id}'; ")
@@ -132,7 +132,7 @@ def step_one(data, psql):
         else:
             pass
 
-        pe_assessment_procedure = data['decisionProcedure']
+        pe_assessment_procedure = data['decisionProcedure'].replace("'", "''")
         if len(pe_assessment_procedure) > 0:
             cur.execute(
                 f"UPDATE cbi_pre_issuance_certification SET pe_assessment_procedure='{pe_assessment_procedure}' WHERE user_email_address='{user_email_address}' AND certification_id='{certification_id}'; ")
@@ -140,7 +140,7 @@ def step_one(data, psql):
         else:
             pass
 
-        pm_proceed_type = data['proceedsType']
+        pm_proceed_type = data['proceedsType'].replace("'", "''")
         if len(pm_proceed_type) > 0:
             cur.execute(
                 f"UPDATE cbi_pre_issuance_certification SET pm_proceed_type='{pm_proceed_type}' WHERE user_email_address='{user_email_address}' AND certification_id='{certification_id}'; ")
@@ -148,7 +148,7 @@ def step_one(data, psql):
         else:
             pass
 
-        pm_proceed_detail = data['proceedsProcessDetail']
+        pm_proceed_detail = data['proceedsProcessDetail'].replace("'", "''")
         if len(pm_proceed_detail) > 0:
             cur.execute(
                 f"UPDATE cbi_pre_issuance_certification SET pm_proceed_detail='{pm_proceed_detail}' WHERE user_email_address='{user_email_address}' AND certification_id='{certification_id}'; ")
@@ -156,7 +156,7 @@ def step_one(data, psql):
         else:
             pass
 
-        pm_proceed_timing = data['proceedsAllocationTiming']
+        pm_proceed_timing = data['proceedsAllocationTiming'].replace("'","''")
         if len(pm_proceed_timing) > 0:
             cur.execute(
                 f"UPDATE cbi_pre_issuance_certification SET pm_proceed_timing='{pm_proceed_timing}' WHERE user_email_address='{user_email_address}' AND certification_id='{certification_id}'; ")
@@ -164,7 +164,7 @@ def step_one(data, psql):
         else:
             pass
 
-        pm_proceed_use = data['proceedsUse']
+        pm_proceed_use = data['proceedsUse'].replace("'","''")
         if len(pm_proceed_use) > 0:
             cur.execute(
                 f"UPDATE cbi_pre_issuance_certification SET pm_proceed_use='{pm_proceed_use}' WHERE user_email_address='{user_email_address}' AND certification_id='{certification_id}'; ")
@@ -172,21 +172,18 @@ def step_one(data, psql):
         else:
             pass
 
-
         d_renewable_energy = data['renewableEnergy']
         if len(d_renewable_energy) > 0:
-            d_renewable_energy = "~".join(d_renewable_energy)
-            cur.execute(
-                f"UPDATE cbi_pre_issuance_certification SET d_renewable_energy='{d_renewable_energy}' WHERE user_email_address='{user_email_address}' AND certification_id='{certification_id}'; ")
+            d_renewable_energy = "~".join(d_renewable_energy).replace("'", "''")
+            cur.execute(f"UPDATE cbi_pre_issuance_certification SET d_renewable_energy='{d_renewable_energy}' WHERE user_email_address='{user_email_address}' AND certification_id='{certification_id}'")
             con.commit()
         else:
             pass
 
         d_renewable_energy_text = data['renewableEnergyText']
         if len(d_renewable_energy_text) > 0:
-            d_renewable_energy_text = "~".join(d_renewable_energy_text)
-            cur.execute(
-                f"UPDATE cbi_pre_issuance_certification SET d_renewable_energy_text='{d_renewable_energy_text}' WHERE user_email_address='{user_email_address}' AND certification_id='{certification_id}'; ")
+            d_renewable_energy_text = "~".join(d_renewable_energy_text).replace("'", "''")
+            cur.execute(f"UPDATE cbi_pre_issuance_certification SET d_renewable_energy_text='{d_renewable_energy_text}' WHERE user_email_address='{user_email_address}' AND certification_id='{certification_id}'")
             con.commit()
         else:
             pass
@@ -213,63 +210,63 @@ def step_two(data, psql):
 
         cur = con.cursor()
 
-        ar_report_interval = data['allocationReportFreq']
+        ar_report_interval = data['allocationReportFreq'].replace("'","''")
         if len(ar_report_interval) > 0:
             cur.execute(f"UPDATE cbi_pre_issuance_certification SET ar_report_interval='{ar_report_interval}' WHERE user_email_address='{user_email_address}' AND certification_id='{certification_id}'; ")
             con.commit()
         else:
             pass
         
-        ar_report_format = data['allocationReportFormat']
+        ar_report_format = data['allocationReportFormat'].replace("'", "''")
         if len(ar_report_format) > 0:
             cur.execute(f"UPDATE cbi_pre_issuance_certification SET ar_report_format='{ar_report_format}' WHERE user_email_address='{user_email_address}' AND certification_id='{certification_id}'; ")
             con.commit()
         else:
             pass
         
-        ar_report_access = data['allocationReportAccess']
+        ar_report_access = data['allocationReportAccess'].replace("'","''")
         if len(ar_report_access) > 0:
             cur.execute(f"UPDATE cbi_pre_issuance_certification SET ar_report_access='{ar_report_access}' WHERE user_email_address='{user_email_address}' AND certification_id='{certification_id}'; ")
             con.commit()
         else:
             pass
         
-        ar_report_link = data['allocationReportAddressLink']
+        ar_report_link = data['allocationReportAddressLink'].replace("'", "''")
         if len(ar_report_link) > 0:
             cur.execute(f"UPDATE cbi_pre_issuance_certification SET ar_report_link='{ar_report_link}' WHERE user_email_address='{user_email_address}' AND certification_id='{certification_id}'; ")
             con.commit()
         else:
             pass
         
-        ar_report_breakdown = data['breakdownInclusion']
+        ar_report_breakdown = data['breakdownInclusion'].replace("'", "''")
         if len(ar_report_breakdown) > 0:
             cur.execute(f"UPDATE cbi_pre_issuance_certification SET ar_report_breakdown='{ar_report_breakdown}' WHERE user_email_address='{user_email_address}' AND certification_id='{certification_id}'; ")
             con.commit()
         else:
             pass
         
-        ir_report_interval = data['impactReportFreq']
+        ir_report_interval = data['impactReportFreq'].replace("'", "''")
         if len(ir_report_interval) > 0:
             cur.execute(f"UPDATE cbi_pre_issuance_certification SET ir_report_interval='{ir_report_interval}' WHERE user_email_address='{user_email_address}' AND certification_id='{certification_id}'; ")
             con.commit()
         else:
             pass
         
-        ir_report_format = data['impactReportFormat']
+        ir_report_format = data['impactReportFormat'].replace("'","''")
         if len(ir_report_format) > 0:
             cur.execute(f"UPDATE cbi_pre_issuance_certification SET ir_report_format='{ir_report_format}' WHERE user_email_address='{user_email_address}' AND certification_id='{certification_id}'; ")
             con.commit()
         else:
             pass
         
-        ir_report_access = data['impactReportAccess']
+        ir_report_access = data['impactReportAccess'].replace("'", "''")
         if len(ir_report_access) > 0:
             cur.execute(f"UPDATE cbi_pre_issuance_certification SET ir_report_access='{ir_report_access}' WHERE user_email_address='{user_email_address}' AND certification_id='{certification_id}'; ")
             con.commit()
         else:
             pass
         
-        ir_report_link = data['impactReportAddressLink']
+        ir_report_link = data['impactReportAddressLink'].replace("'", "''")
         if len(ir_report_link) > 0:
             cur.execute(
                 f"UPDATE cbi_pre_issuance_certification SET ir_report_link='{ir_report_link}' WHERE user_email_address='{user_email_address}' AND certification_id='{certification_id}'; ")
@@ -277,7 +274,7 @@ def step_two(data, psql):
         else:
             pass
         
-        ir_report_indicators = data['quantitativeImpact']
+        ir_report_indicators = data['quantitativeImpact'].replace("'", "''")
         if len(ir_report_indicators) > 0:
             cur.execute(
                 f"UPDATE cbi_pre_issuance_certification SET ir_report_indicators='{ir_report_indicators}' WHERE user_email_address='{user_email_address}' AND certification_id='{certification_id}'; ")
@@ -292,21 +289,21 @@ def step_two(data, psql):
         else:
             pass
         
-        ci_vat_number = data['vatNumber']
+        ci_vat_number = data['vatNumber'].replace("'","''")
         if len(ci_vat_number) > 0:
             cur.execute(f"UPDATE cbi_pre_issuance_certification SET ci_vat_number='{ci_vat_number}' WHERE user_email_address='{user_email_address}' AND certification_id='{certification_id}'; ")
             con.commit()
         else:
             pass
 
-        ci_business_reg_number = data['businessRegistration']
+        ci_business_reg_number = data['businessRegistration'].replace("'","''")
         if len(ci_business_reg_number) > 0:
             cur.execute(f"UPDATE cbi_pre_issuance_certification SET ci_business_reg_number='{ci_business_reg_number}' WHERE user_email_address='{user_email_address}' AND certification_id='{certification_id}'; ")
             con.commit()
         else:
             pass
 
-        cp_name = data['contactName']
+        cp_name = data['contactName'].replace("'","''")
         if len(cp_name) > 0:
             cur.execute(
                 f"UPDATE cbi_pre_issuance_certification SET cp_name='{cp_name}' WHERE user_email_address='{user_email_address}' AND certification_id='{certification_id}'; ")
@@ -314,7 +311,7 @@ def step_two(data, psql):
         else:
             pass
 
-        cp_position = data['position']
+        cp_position = data['position'].replace("'","''")
         if len(cp_position) > 0:
             cur.execute(
                 f"UPDATE cbi_pre_issuance_certification SET cp_position='{cp_position}' WHERE user_email_address='{user_email_address}' AND certification_id='{certification_id}'; ")
@@ -322,21 +319,21 @@ def step_two(data, psql):
         else:
             pass
 
-        cp_company = data['company']
+        cp_company = data['company'].replace("'","''")
         if len(cp_company) > 0:
             cur.execute(f"UPDATE cbi_pre_issuance_certification SET cp_company='{cp_company}' WHERE user_email_address='{user_email_address}' AND certification_id='{certification_id}'; ")
             con.commit()
         else:
             pass
 
-        cp_contact_number = data['contactNumber']
+        cp_contact_number = data['contactNumber'].replace("'","''")
         if len(cp_contact_number) > 0:
             cur.execute(f"UPDATE cbi_pre_issuance_certification SET cp_contact_number='{cp_contact_number}' WHERE user_email_address='{user_email_address}' AND certification_id='{certification_id}'; ")
             con.commit()
         else:
             pass
 
-        id_name = data['invoiceName']
+        id_name = data['invoiceName'].replace("'", "''")
         if len(id_name) > 0:
             cur.execute(f"UPDATE cbi_pre_issuance_certification SET id_name='{id_name}' WHERE user_email_address='{user_email_address}' AND certification_id='{certification_id}'; ")
             con.commit()
@@ -375,14 +372,14 @@ def step_three(data, psql):
         else:
             temp=''
 
-        ca_legal_name_issuing_entity = data['issuingEntityLegalName']
+        ca_legal_name_issuing_entity = data['issuingEntityLegalName'].replace("'","''")
         if len(ca_legal_name_issuing_entity) > 0:
             cur.execute(f"UPDATE cbi_pre_issuance_certification SET ca_legal_name_issuing_entity='{ca_legal_name_issuing_entity}' WHERE user_email_address='{user_email_address}' AND certification_id='{certification_id}'; ")
             con.commit()
         else:
             pass
 
-        ca_unique_name_debt_instruments = data['debtInstrumentsUniqueName']
+        ca_unique_name_debt_instruments = data['debtInstrumentsUniqueName'].replace("'","''")
         if len(ca_unique_name_debt_instruments) > 0:
             cur.execute(f"UPDATE cbi_pre_issuance_certification SET ca_unique_name_debt_instruments='{ca_unique_name_debt_instruments}' WHERE user_email_address='{user_email_address}' AND certification_id='{certification_id}'; ")
             con.commit()
@@ -396,21 +393,21 @@ def step_three(data, psql):
         else:
             pass
 
-        ca_email_address = data['email']
+        ca_email_address = data['email'].replace("'", "''")
         if len(ca_email_address) > 0:
             cur.execute(f"UPDATE cbi_pre_issuance_certification SET ca_email_address='{ca_email_address}' WHERE user_email_address='{user_email_address}' AND certification_id='{certification_id}'; ")
             con.commit()
         else:
             pass
 
-        ca_contact_person = data['issuerContactPerson']
+        ca_contact_person = data['issuerContactPerson'].replace("'","''")
         if len(ca_contact_person) > 0:
             cur.execute(f"UPDATE cbi_pre_issuance_certification SET ca_contact_person='{ca_contact_person}' WHERE user_email_address='{user_email_address}' AND certification_id='{certification_id}'; ")
             con.commit()
         else:
             pass
 
-        ca_signature = data['signature']
+        ca_signature = data['signature'].replace("'", "''")
         if len(ca_signature) > 0:
             cur.execute(f"UPDATE cbi_pre_issuance_certification SET ca_signature='{ca_signature}' WHERE user_email_address='{user_email_address}' AND certification_id='{certification_id}'; ")
             con.commit()
@@ -486,8 +483,7 @@ def step_four(certification_id, user_email_address, file_1, file_2, psql):
 
         cur = con.cursor()
 
-
-        single_issuer_agreement = file_1
+        single_issuer_agreement = file_1.replace("'", "''")
         if len(single_issuer_agreement) > 0:
             cur.execute(
                 f"UPDATE cbi_pre_issuance_certification SET single_issuer_agreement='{single_issuer_agreement}' WHERE user_email_address='{user_email_address}' AND certification_id='{certification_id}'; ")
@@ -495,7 +491,7 @@ def step_four(certification_id, user_email_address, file_1, file_2, psql):
         else:
             pass
 
-        verifier_agreement = file_2
+        verifier_agreement = file_2.replace("'", "''")
         if len(verifier_agreement) > 0:
             cur.execute(
                 f"UPDATE cbi_pre_issuance_certification SET verifier_agreement='{verifier_agreement}' WHERE user_email_address='{user_email_address}' AND certification_id='{certification_id}'; ")
@@ -543,7 +539,7 @@ def submit(data, psql):
         user_data = cur.fetchone()
 
         query = "INSERT INTO CBI_Certification_Queue(certification_id,certification_type,certification_status,application_date,user_company,certification_company,instrument_type,underwriter) VALUES('{0}', '{1}','{2}','{3}','{4}','{5}','{6}','{7}'); ".format(
-            certification_id, 'pre', 'submitted', now,user_data[0],cert_data[2],cert_data[0],cert_data[1])
+            certification_id, 'pre', 'submitted', now, user_data[0].replace("'", "''"), cert_data[2].replace("'", "''"), cert_data[0].replace("'", "''"), cert_data[1].replace("'", "''"))
         cur.execute(query)
         con.commit()
 

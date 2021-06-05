@@ -39,7 +39,7 @@ def cert(cert_type,cert_id,psql):
             query = f"UPDATE cbi_post_issuance_certification SET certification_status='approved' WHERE certification_id='{cert_id}'; "
             cur.execute(query)
             con.commit()
-        elif cert_type == "bond_redemption":
+        elif cert_type == "bondRedemption":
             query = f"UPDATE cbi_bond_redemption SET certification_status='approved' WHERE certification_id='{cert_id}'; "
             cur.execute(query)
             con.commit()
@@ -65,7 +65,7 @@ def cert(cert_type,cert_id,psql):
             con.commit()
             issuer_name = data_one[0]+" "+data_one[1]
 
-        elif cert_type == "bond_redemption":
+        elif cert_type == "bondRedemption":
             cur.execute(f"SELECT instrument_type,ca_legal_name_issuing_entity,cp_name,ca_address,da_name, user_email_address, da_name from cbi_post_issuance_certification WHERE certification_id='{cert_id}'")
             data = cur.fetchone()
             con.commit()
@@ -110,7 +110,7 @@ def cert(cert_type,cert_id,psql):
         elif cert_type == "post":
             generate_approval_post(cert_id, cert_type, approval_date, cp_name, issuing_entity_legal_name, cp_address, unique_name)
             mail_issuer_post(cert_id, cert_type,issuer_name, da_name,data[5])
-        elif cert_type == "bond_redemption":
+        elif cert_type == "bondRedemption":
             # mail_issuer_bond(cert_id, cert_type)
             pass
 
@@ -123,183 +123,191 @@ def cert(cert_type,cert_id,psql):
 
         
 def mail_issuer_pre(cert_id, cert_type, issuer_name, da_name, user_email):
-    paths = os.path.dirname(os.path.abspath(__file__)).replace("\\", "/")
+    try:
+        paths = os.path.dirname(os.path.abspath(__file__)).replace("\\", "/")
 
-    filename1 = "certificate_"+str(cert_id)+"_"+str(cert_type)+".pdf"
-    filepath1 = '/var/www/html/cbi-api/cbi_uploads/'+filename1
+        filename1 = "certificate_"+str(cert_id)+"_"+str(cert_type)+".pdf"
+        filepath1 = '/var/www/html/cbi-api/cbi_uploads/'+filename1
 
-    filename2 = "approval_"+str(cert_id)+"_"+str(cert_type)+".pdf"
-    filepath2 = '/var/www/html/cbi-api/cbi_uploads/'+filename2
+        filename2 = "approval_"+str(cert_id)+"_"+str(cert_type)+".pdf"
+        filepath2 = '/var/www/html/cbi-api/cbi_uploads/'+filename2
 
-    filename3 = "CBS_Certified-RGB.jpg"
-    filepath3 = paths+'/template/'+filename3
+        filename3 = "CBS_Certified-RGB.jpg"
+        filepath3 = paths+'/template/'+filename3
 
-    filename4 = "CBI Certification logo guidelines - 2020.pdf"
-    filepath4 = paths+'/template/'+filename4
+        filename4 = "CBI Certification logo guidelines - 2020.pdf"
+        filepath4 = paths+'/template/'+filename4
 
-    sender = 'cbigithub@vigameq.com'
-    recipient = user_email#['varunomkar007@gmail.com', 'naveenbodicherla@gmail.com','nithin.gangadhar@vigameq.com','vishwas.vidyaranya@climatebonds.net']
+        sender = 'cbigithub@vigameq.com'
+        recipient = user_email#['varunomkar007@gmail.com', 'naveenbodicherla@gmail.com','nithin.gangadhar@vigameq.com','vishwas.vidyaranya@climatebonds.net']
 
 
-    body = f"""
-            <html>
-            <body><style> p {{ font-family: Palatino Linotype; }}</style><p>
-            Dear {issuer_name}, <br> <br>
- 
-            We are pleased to formally confirm Pre-Issuance Certification by the Climate Bonds Standard Board of the proposed {da_name}, which will be issued by {issuer_name}. 
-            <br><br>
-            Please find attached the following documents for the Certification:  
-            <br><br>
-            1) A formal Letter of Certification for your records <br>
-            2) A Certificate, for your promotional efforts <br>
-            3) The Certification Mark file <br>
-            4) Guidance on using the Certification Mark
-            <br><br>
-            Please be in touch with our communications team (leena.fatin@climatebonds.net) from the Climate Bonds Initiative Communications Team who can coordinate with you in case you plan to do any communications associated with the issuance of this bond. 
-            <br><br>
-            After your issuance, we will be producing an entry for our <a href="https://climatebonds.net/bond-library">Bond Library</a> and publishing the relevant documents on our <a href="https://www.climatebonds.net/certification/certified-bonds">Listing of Certified Bonds</a> on the Climate Bonds Initiative website. We will also send you an invoice for the Certification Fee, as per our signed Certification Agreement.
-            <br><br>
-            Please do not hesitate to contact us for clarifications or if there is anything we can do to help.  
-            <br><br>
-            Congratulations on your Certification! 
-            <br>
-            <i>The Climate Bonds Certification Team</i>
-            
-            </p>
-            
-            </body></html>
-                """
-    msg = MIMEMultipart("alternative", None, [
-        MIMEText(body), MIMEText(body, 'html')])
-    msg['Subject'] = f"Confirmation of Pre-Issuance Certification of {da_name}"
-    msg['From'] = sender
-    msg['To'] = recipient#", ".join(recipient)
+        body = f"""
+                <html>
+                <body><style> p {{ font-family: Palatino Linotype; }}</style><p>
+                Dear {issuer_name}, <br> <br>
+    
+                We are pleased to formally confirm Pre-Issuance Certification by the Climate Bonds Standard Board of the proposed {da_name}, which will be issued by {issuer_name}. 
+                <br><br>
+                Please find attached the following documents for the Certification:  
+                <br><br>
+                1) A formal Letter of Certification for your records <br>
+                2) A Certificate, for your promotional efforts <br>
+                3) The Certification Mark file <br>
+                4) Guidance on using the Certification Mark
+                <br><br>
+                Please be in touch with our communications team (leena.fatin@climatebonds.net) from the Climate Bonds Initiative Communications Team who can coordinate with you in case you plan to do any communications associated with the issuance of this bond. 
+                <br><br>
+                After your issuance, we will be producing an entry for our <a href="https://climatebonds.net/bond-library">Bond Library</a> and publishing the relevant documents on our <a href="https://www.climatebonds.net/certification/certified-bonds">Listing of Certified Bonds</a> on the Climate Bonds Initiative website. We will also send you an invoice for the Certification Fee, as per our signed Certification Agreement.
+                <br><br>
+                Please do not hesitate to contact us for clarifications or if there is anything we can do to help.  
+                <br><br>
+                Congratulations on your Certification! 
+                <br>
+                <i>The Climate Bonds Certification Team</i>
+                
+                </p>
+                
+                </body></html>
+                    """
+        msg = MIMEMultipart("alternative", None, [
+            MIMEText(body), MIMEText(body, 'html')])
+        msg['Subject'] = f"Confirmation of Pre-Issuance Certification of {da_name}"
+        msg['From'] = sender
+        msg['To'] = recipient#", ".join(recipient)
 
-    attachment = open(filepath1, "rb")
-    p = MIMEBase('application', 'octet-stream')
-    p.set_payload((attachment).read())
-    encoders.encode_base64(p)
-    p.add_header('Content-Disposition',
-                 "attachment; filename= %s" % filename1)
-    msg.attach(p)
+        attachment = open(filepath1, "rb")
+        p = MIMEBase('application', 'octet-stream')
+        p.set_payload((attachment).read())
+        encoders.encode_base64(p)
+        p.add_header('Content-Disposition',
+                    "attachment; filename= %s" % filename1)
+        msg.attach(p)
 
-    attachment1 = open(filepath2, "rb")
-    p1 = MIMEBase('application', 'octet-stream')
-    p1.set_payload((attachment1).read())
-    encoders.encode_base64(p1)
-    p1.add_header('Content-Disposition',
-                  "attachment; filename= %s" % filename2)
-    msg.attach(p1)
+        attachment1 = open(filepath2, "rb")
+        p1 = MIMEBase('application', 'octet-stream')
+        p1.set_payload((attachment1).read())
+        encoders.encode_base64(p1)
+        p1.add_header('Content-Disposition',
+                    "attachment; filename= %s" % filename2)
+        msg.attach(p1)
 
-    attachment2 = open(filepath3, "rb")
-    p2 = MIMEBase('application', 'octet-stream')
-    p2.set_payload((attachment2).read())
-    encoders.encode_base64(p2)
-    p2.add_header('Content-Disposition',
-                  "attachment; filename= %s" % filename3)
-    msg.attach(p2)
+        attachment2 = open(filepath3, "rb")
+        p2 = MIMEBase('application', 'octet-stream')
+        p2.set_payload((attachment2).read())
+        encoders.encode_base64(p2)
+        p2.add_header('Content-Disposition',
+                    "attachment; filename= %s" % filename3)
+        msg.attach(p2)
 
-    attachment3 = open(filepath4, "rb")
-    p3 = MIMEBase('application', 'octet-stream')
-    p3.set_payload((attachment3).read())
-    encoders.encode_base64(p3)
-    p3.add_header('Content-Disposition',
-                  "attachment; filename= %s" % filename4)
-    msg.attach(p3)
+        attachment3 = open(filepath4, "rb")
+        p3 = MIMEBase('application', 'octet-stream')
+        p3.set_payload((attachment3).read())
+        encoders.encode_base64(p3)
+        p3.add_header('Content-Disposition',
+                    "attachment; filename= %s" % filename4)
+        msg.attach(p3)
 
-    server = smtplib.SMTP_SSL('smtp.zoho.com', 465)
-    server.login(sender, 'Vigameq@i2R')
-    server.sendmail(sender, recipient, msg.as_string())
-    server.quit()
+        server = smtplib.SMTP_SSL('smtp.zoho.com', 465)
+        server.login(sender, 'Vigameq@i2R')
+        server.sendmail(sender, recipient, msg.as_string())
+        server.quit()
+    except Exception as e:
+        error = str(e)
+        return {'error': error}, 409
 
 
 def mail_issuer_post(cert_id, cert_type, issuer_name, da_name, user_email):
-    paths = os.path.dirname(os.path.abspath(__file__)).replace("\\", "/")
+    try:
+        paths = os.path.dirname(os.path.abspath(__file__)).replace("\\", "/")
 
-    # filename1 = "certificate_"+str(cert_id)+"_"+str(cert_type)+".pdf"
-    # filepath1 = '/var/www/html/cbi-api/cbi_uploads/'+filename1
+        # filename1 = "certificate_"+str(cert_id)+"_"+str(cert_type)+".pdf"
+        # filepath1 = '/var/www/html/cbi-api/cbi_uploads/'+filename1
 
-    filename2 = "approval_"+str(cert_id)+"_"+str(cert_type)+".pdf"
-    filepath2 = '/var/www/html/cbi-api/cbi_uploads/'+filename2
+        filename2 = "approval_"+str(cert_id)+"_"+str(cert_type)+".pdf"
+        filepath2 = '/var/www/html/cbi-api/cbi_uploads/'+filename2
 
-    filename3 = "CBS_Certified-RGB.jpg"
-    filepath3 = paths+'/template/'+filename3
+        filename3 = "CBS_Certified-RGB.jpg"
+        filepath3 = paths+'/template/'+filename3
 
-    filename4 = "CBI Certification logo guidelines - 2020.pdf"
-    filepath4 = paths+'/template/'+filename4
+        filename4 = "CBI Certification logo guidelines - 2020.pdf"
+        filepath4 = paths+'/template/'+filename4
 
-    sender = 'cbigithub@vigameq.com'
-    recipient = user_email#['varunomkar007@gmail.com', 'naveenbodicherla@gmail.com','nithin.gangadhar@vigameq.com','vishwas.vidyaranya@climatebonds.net']
+        sender = 'cbigithub@vigameq.com'
+        recipient = user_email#['varunomkar007@gmail.com', 'naveenbodicherla@gmail.com','nithin.gangadhar@vigameq.com','vishwas.vidyaranya@climatebonds.net']
 
-    body = f"""
-            <html>
-            <body><style> p {{ font-family: Palatino Linotype;}}</style><p>
-            Dear {issuer_name}, <br><br>
- 
-            We are pleased to formally confirm Post-Issuance Certification by the Climate Bonds Standard Board of the proposed {da_name}, which will be issued by {issuer_name}. 
-            <br><br>
-            Please find attached the following documents for the Certification:  
-            <br><br>
-            1) A formal Letter of Certification for your records <br>
-            2) The Certification Mark file <br>
-            3) Guidance on using the Certification Mark
-            <br><br>
-            We will proceed to add an entry for our <a href="https://climatebonds.net/bond-library">Bond Library</a> and publish the relevant documents on our <a href="https://www.climatebonds.net/certification/certified-bonds">Listing of Certified Bonds</a> on the Climate Bonds Initiative website. 
-            <br><br><br>
-            Please be in touch with our communications team (leena.fatin@climatebonds.net) from the Climate Bonds Initiative Communications Team who can coordinate with you in case you plan to do any communications associated with the post issuance certification of this bond. 
-            <br><br>
-            Please do not hesitate to contact us for clarifications or if there is anything we can do to help.   
-            <br><br>
-            Congratulations on your Certification! 
-            <br>
-            <i>The Climate Bonds Certification Team</i>
-            
-            </p>
-            
-            </body></html>
-                """
-    msg = MIMEMultipart("alternative", None, [
-        MIMEText(body), MIMEText(body, 'html')])
-    msg['Subject'] = f"Confirmation of Post-Issuance Certification of {da_name}"
-    msg['From'] = sender
-    msg['To'] = recipient#", ".join(recipient)
+        body = f"""
+                <html>
+                <body><style> p {{ font-family: Palatino Linotype;}}</style><p>
+                Dear {issuer_name}, <br><br>
+    
+                We are pleased to formally confirm Post-Issuance Certification by the Climate Bonds Standard Board of the proposed {da_name}, which will be issued by {issuer_name}. 
+                <br><br>
+                Please find attached the following documents for the Certification:  
+                <br><br>
+                1) A formal Letter of Certification for your records <br>
+                2) The Certification Mark file <br>
+                3) Guidance on using the Certification Mark
+                <br><br>
+                We will proceed to add an entry for our <a href="https://climatebonds.net/bond-library">Bond Library</a> and publish the relevant documents on our <a href="https://www.climatebonds.net/certification/certified-bonds">Listing of Certified Bonds</a> on the Climate Bonds Initiative website. 
+                <br><br><br>
+                Please be in touch with our communications team (leena.fatin@climatebonds.net) from the Climate Bonds Initiative Communications Team who can coordinate with you in case you plan to do any communications associated with the post issuance certification of this bond. 
+                <br><br>
+                Please do not hesitate to contact us for clarifications or if there is anything we can do to help.   
+                <br><br>
+                Congratulations on your Certification! 
+                <br>
+                <i>The Climate Bonds Certification Team</i>
+                
+                </p>
+                
+                </body></html>
+                    """
+        msg = MIMEMultipart("alternative", None, [
+            MIMEText(body), MIMEText(body, 'html')])
+        msg['Subject'] = f"Confirmation of Post-Issuance Certification of {da_name}"
+        msg['From'] = sender
+        msg['To'] = recipient#", ".join(recipient)
 
-    # attachment = open(filepath1, "rb")
-    # p = MIMEBase('application', 'octet-stream')
-    # p.set_payload((attachment).read())
-    # encoders.encode_base64(p)
-    # p.add_header('Content-Disposition',
-    #              "attachment; filename= %s" % filename1)
-    # msg.attach(p)
+        # attachment = open(filepath1, "rb")
+        # p = MIMEBase('application', 'octet-stream')
+        # p.set_payload((attachment).read())
+        # encoders.encode_base64(p)
+        # p.add_header('Content-Disposition',
+        #              "attachment; filename= %s" % filename1)
+        # msg.attach(p)
 
-    attachment1 = open(filepath2, "rb")
-    p1 = MIMEBase('application', 'octet-stream')
-    p1.set_payload((attachment1).read())
-    encoders.encode_base64(p1)
-    p1.add_header('Content-Disposition',
-                  "attachment; filename= %s" % filename2)
-    msg.attach(p1)
+        attachment1 = open(filepath2, "rb")
+        p1 = MIMEBase('application', 'octet-stream')
+        p1.set_payload((attachment1).read())
+        encoders.encode_base64(p1)
+        p1.add_header('Content-Disposition',
+                    "attachment; filename= %s" % filename2)
+        msg.attach(p1)
 
-    attachment2 = open(filepath3, "rb")
-    p2 = MIMEBase('application', 'octet-stream')
-    p2.set_payload((attachment2).read())
-    encoders.encode_base64(p2)
-    p2.add_header('Content-Disposition',
-                  "attachment; filename= %s" % filename3)
-    msg.attach(p2)
+        attachment2 = open(filepath3, "rb")
+        p2 = MIMEBase('application', 'octet-stream')
+        p2.set_payload((attachment2).read())
+        encoders.encode_base64(p2)
+        p2.add_header('Content-Disposition',
+                    "attachment; filename= %s" % filename3)
+        msg.attach(p2)
 
-    attachment3 = open(filepath4, "rb")
-    p3 = MIMEBase('application', 'octet-stream')
-    p3.set_payload((attachment3).read())
-    encoders.encode_base64(p3)
-    p3.add_header('Content-Disposition',
-                  "attachment; filename= %s" % filename4)
-    msg.attach(p3)
+        attachment3 = open(filepath4, "rb")
+        p3 = MIMEBase('application', 'octet-stream')
+        p3.set_payload((attachment3).read())
+        encoders.encode_base64(p3)
+        p3.add_header('Content-Disposition',
+                    "attachment; filename= %s" % filename4)
+        msg.attach(p3)
 
-    server = smtplib.SMTP_SSL('smtp.zoho.com', 465)
-    server.login(sender, 'Vigameq@i2R')
-    server.sendmail(sender, recipient, msg.as_string())
-    server.quit()
+        server = smtplib.SMTP_SSL('smtp.zoho.com', 465)
+        server.login(sender, 'Vigameq@i2R')
+        server.sendmail(sender, recipient, msg.as_string())
+        server.quit()
+    except Exception as e:
+        error = str(e)
+        return {'error': error}, 409
 
 
 def generate_certificate(instrument_type, issuing_entity_legal_name, approval_date, cert_id,cert_type):

@@ -786,9 +786,9 @@ def unassigned_queue(user_email_address, psql):
 
                     resp_data = {"certificationId": cert_queue_data[1],
                                  "userEmail": cert_queue_data[2],
-                                 "certificationStatus": cert_queue_data[3],
+                                 "certificationStatus": cert_queue_data_redemption[3],
                                  "instrumentType": cert_queue_data[4],
-                                 "certificationType": "bond_redemption",
+                                 "certificationType": "bondRedemption",
                                  "uniqueName": da_name,
                                  "issuanceCountry": da_issuance_country,
                                  "cusip": da_cusip,
@@ -897,6 +897,9 @@ def assign_reviewer(user_email_address,certification_type,certification_id, psql
         now= datetime.now()
 
         try:
+
+            if certification_type == 'bondRedemption':
+                certification_type = 'bond_redemption'
 
             query = f"UPDATE cbi_certification_queue SET reviewer='{user_email_address}',assigned_date='{now}',certification_status='in-review' WHERE certification_type='{certification_type}'  AND certification_id='{certification_id}'; "
             cur.execute(query)

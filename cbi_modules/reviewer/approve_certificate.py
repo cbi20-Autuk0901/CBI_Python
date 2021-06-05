@@ -27,7 +27,10 @@ def cert(cert_type,cert_id,psql):
         now = datetime.now()
         now = str(now).split(" ")[0]
 
-        query = f"UPDATE cbi_certification_queue SET approved_date='{now}',certification_status='approved' WHERE certification_type='{cert_type}'  AND certification_id='{cert_id}'; "
+        if cert_type == 'bondRedemption':
+                certification_type = 'bond_redemption'
+
+        query = f"UPDATE cbi_certification_queue SET approved_date='{now}',certification_status='approved' WHERE certification_type='{certification_type}'  AND certification_id='{cert_id}'; "
         cur.execute(query)
         con.commit()
 

@@ -24,7 +24,7 @@ def redeem(certification_id, user_email_address, file_1, file_2,file3, file4, fi
 
             cur = con.cursor()
 
-            certification_status = 'approved'#'submitted'
+            certification_status = 'submitted'
 
             now= datetime.now()
 
@@ -40,7 +40,7 @@ def redeem(certification_id, user_email_address, file_1, file_2,file3, file4, fi
             user_data = cur.fetchone()
 
             query = "INSERT INTO CBI_Certification_Queue(certification_id,certification_type,certification_status,application_date,user_company,certification_company,instrument_type,underwriter) VALUES('{0}', '{1}','{2}','{3}','{4}','{5}','{6}','{7}'); ".format(
-                certification_id, 'bond_redemption', 'submitted', now, user_data[0].replace("'", "''"), cert_data[2].replace("'", "''"), cert_data[0].replace("'", "''"), cert_data[1].replace("'", "''"))
+                certification_id, 'bond_redemption', 'submitted', now, user_data[0], cert_data[2], cert_data[0], cert_data[1].replace("'", "''"))
             cur.execute(query)
             con.commit()
             con.close()

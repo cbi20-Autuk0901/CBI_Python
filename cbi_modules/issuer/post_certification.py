@@ -495,7 +495,7 @@ def submit(data, psql):
         user_data = cur.fetchone()
 
         query = "INSERT INTO CBI_Certification_Queue(certification_id,certification_type,certification_status,application_date,user_company,certification_company,instrument_type,underwriter) VALUES('{0}', '{1}','{2}','{3}','{4}','{5}','{6}','{7}'); ".format(
-            certification_id, 'post', 'submitted', now,user_data[0].replace("'", "''"),cert_data[2].replace("'", "''"),cert_data[0].replace("'", "''"),cert_data[1].replace("'", "''"))
+            certification_id, 'post', 'submitted', now,user_data[0],cert_data[2],cert_data[0],cert_data[1].replace("'", "''"))
         cur.execute(query)
         con.commit()
 

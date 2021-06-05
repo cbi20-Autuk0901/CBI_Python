@@ -1204,12 +1204,17 @@ def delete_certification(data,psql):
         if certification_type == 'pre':
             cur.execute(f"DELETE from cbi_certification_queue WHERE certification_id='{certification_id}' and certification_type='pre'")
             con.commit()
-        elif certification_type == 'post':
             cur.execute(f"DELETE from cbi_pre_issuance_certification WHERE certification_id='{certification_id}'")
             con.commit()
+        elif certification_type == 'post':    
             cur.execute(f"DELETE from cbi_certification_queue WHERE certification_id='{certification_id}' and certification_type='post'")
             con.commit()
             cur.execute(f"DELETE from cbi_post_issuance_certification WHERE certification_id='{certification_id}'")
+            con.commit()
+        elif certification_type == 'bondRedemption':
+            cur.execute(f"DELETE from cbi_certification_queue WHERE certification_id='{certification_id}' and certification_type='bond_redemption'")
+            con.commit()
+            cur.execute(f"DELETE from cbi_bond_redemption WHERE certification_id='{certification_id}'")
             con.commit()
         else:
             con.close()

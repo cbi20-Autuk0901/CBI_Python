@@ -711,7 +711,7 @@ def assigned_queue(user_email_address, psql):
                     con.commit()
 
                     cur.execute(
-                        f"SELECT string_agg(files, ',') AS file_list FROM CBI_Annual_Reports where certification_id='{j[1]}' GROUP BY certification_id;")
+                        f"SELECT string_agg(files, ',') AS file_list FROM CBI_Annual_Reports where certification_id='{i[1]}' GROUP BY certification_id;")
                     try:
                         annual_reports_data = str(cur.fetchone()[0]).split(",")
                         annual_reports = []

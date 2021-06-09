@@ -29,6 +29,8 @@ def cert(cert_type,cert_id,psql):
 
         if cert_type == 'bondRedemption':
                 certification_type = 'bond_redemption'
+        else:
+            certification_type = cert_type
 
         query = f"UPDATE cbi_certification_queue SET approved_date='{now}',certification_status='approved' WHERE certification_type='{certification_type}'  AND certification_id='{cert_id}'; "
         cur.execute(query)

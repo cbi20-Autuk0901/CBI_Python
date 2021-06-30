@@ -188,6 +188,30 @@ def step_one(data, psql):
         else:
             pass
 
+        is_info_confidential = data['isInfoConfidential']
+        if len(is_info_confidential) > 0:
+            cur.execute(
+                f"UPDATE cbi_pre_issuance_certification SET is_info_confidential='{is_info_confidential}' WHERE user_email_address='{user_email_address}' AND certification_id='{certification_id}'")
+            con.commit()
+        else:
+            pass
+
+        lead_underwriters = data['leadUnderwriters']
+        if len(lead_underwriters) > 0:
+            cur.execute(
+                f"UPDATE cbi_pre_issuance_certification SET lead_underwriters='{lead_underwriters}' WHERE user_email_address='{user_email_address}' AND certification_id='{certification_id}'")
+            con.commit()
+        else:
+            pass
+
+        proceeds_allocation_timing_explaination = data['proceedsAllocationTimingExplanation']
+        if len(proceeds_allocation_timing_explaination) > 0:
+            cur.execute(
+                f"UPDATE cbi_pre_issuance_certification SET proceeds_allocation_timing_explaination='{proceeds_allocation_timing_explaination}' WHERE user_email_address='{user_email_address}' AND certification_id='{certification_id}'")
+            con.commit()
+        else:
+            pass
+
         con.close()
 
         return {'certificationId': certification_id, 'userEmail': user_email_address, "certificationType": "pre"}, 200
@@ -564,7 +588,7 @@ def step_one_get(user_email_address, certification_id, psql):
         cur = con.cursor()
 
         cur.execute(
-            f"SELECT instrument_type, da_name, da_issuance_country, da_cusip, da_isin, da_local_currency_lc, da_amount_issued_lc, da_coupon, da_underwriter, da_issue_date, da_maturity_date, d_renewable_energy, d_renewable_energy_text,ps_financing_asset, ps_proceeds_allocation, pe_portfolio_approach, pe_assessment_procedure, pm_proceed_type, pm_proceed_detail, pm_proceed_timing, pm_proceed_use, da_instrument_type from cbi_pre_issuance_certification  WHERE user_email_address='{user_email_address}' and certification_id='{certification_id}'")
+            f"SELECT instrument_type, da_name, da_issuance_country, da_cusip, da_isin, da_local_currency_lc, da_amount_issued_lc, da_coupon, da_underwriter, da_issue_date, da_maturity_date, d_renewable_energy, d_renewable_energy_text,ps_financing_asset, ps_proceeds_allocation, pe_portfolio_approach, pe_assessment_procedure, pm_proceed_type, pm_proceed_detail, pm_proceed_timing, pm_proceed_use, da_instrument_type,is_info_confidential,lead_underwriters,proceeds_allocation_timing_explaination from cbi_pre_issuance_certification  WHERE user_email_address='{user_email_address}' and certification_id='{certification_id}'")
         data = cur.fetchone()
 
         con.close()
@@ -665,6 +689,18 @@ def step_one_get(user_email_address, certification_id, psql):
         if da_instrument_type is None:
             da_instrument_type = ""
 
+        is_info_confidential = data[22]
+        if is_info_confidential is None:
+            is_info_confidential = ""
+
+        lead_underwriters = data[23]
+        if lead_underwriters is None:
+            lead_underwriters = ""
+
+        proceeds_allocation_timing_explaination = data[24]
+        if proceeds_allocation_timing_explaination is None:
+            proceeds_allocation_timing_explaination = ""
+
         return {"certificationId": certification_id,
                 "userEmail": user_email_address,
                 "instrumentType": instrument_type,
@@ -689,7 +725,10 @@ def step_one_get(user_email_address, certification_id, psql):
                 "proceedsProcessDetail": pm_proceed_detail,
                 "proceedsAllocationTiming": pm_proceed_timing,
                 "proceedsUse": pm_proceed_use,
-                "daInstrumentType": da_instrument_type}, 200
+                "daInstrumentType": da_instrument_type,
+                "isInfoConfidential": is_info_confidential,
+                "leadUnderwriters": lead_underwriters,
+                "proceedsAllocationTimingExplanation": proceeds_allocation_timing_explaination}, 200
 
     except Exception as e:
         error = str(e)

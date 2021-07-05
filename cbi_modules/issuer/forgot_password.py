@@ -56,6 +56,6 @@ def mail(to, res):
     msg['From'] = sender
     msg['To'] = recipient
     server = smtplib.SMTP_SSL('smtp.zoho.com', 465)
-    server.login(sender, 'Vigameq@i2R')
+    server.login(sender, 'Cbigithub@i2R')
     server.sendmail(sender, recipient, msg.as_string())
     server.quit()

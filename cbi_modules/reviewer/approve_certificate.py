@@ -214,7 +214,7 @@ def mail_issuer_pre(cert_id, cert_type, issuer_name, da_name, user_email):
         msg.attach(p3)
 
         server = smtplib.SMTP_SSL('smtp.zoho.com', 465)
-        server.login(sender, 'Vigameq@i2R')
+        server.login(sender, 'Cbigithub@i2R')
         server.sendmail(sender, recipient, msg.as_string())
         server.quit()
     except Exception as e:
@@ -307,7 +307,7 @@ def mail_issuer_post(cert_id, cert_type, issuer_name, da_name, user_email):
         msg.attach(p3)
 
         server = smtplib.SMTP_SSL('smtp.zoho.com', 465)
-        server.login(sender, 'Vigameq@i2R')
+        server.login(sender, 'Cbigithub@i2R')
         server.sendmail(sender, recipient, msg.as_string())
         server.quit()
     except Exception as e:
